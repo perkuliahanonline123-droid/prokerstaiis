@@ -1,214 +1,202 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Alur Kerja Rutin Divisi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .animate-pulse-slow { animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-  </style>
-</head>
-<body class="bg-[#f9fafb] text-gray-900 min-h-screen">
-
-  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16 items-center">
-        <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-sm">🔄</span>
-          </div>
-          <span class="text-xl font-bold tracking-tight text-gray-900">WorkPlan Pro</span>
-        </div>
-        <div class="flex items-center space-x-4">
-          <span class="flex items-center text-xs font-medium bg-gray-100 text-gray-800 px-3 py-1.5 rounded-full border border-gray-200">
-            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-            Live Database Connected
-          </span>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#7f1d1d">
+    <title>Program Kerja Divisi</title>
     
-    <div class="mb-8">
-      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Monitoring Pekerjaan Rutin</h1>
-      <p class="text-sm text-gray-500 mt-1">Data otomatis diurutkan kronologis berdasarkan batas waktu terdekat.</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Alarm Kritis (Bulan Ini)</p>
-          <h3 id="stat-critical" class="text-3xl font-bold text-red-600 mt-1">0</h3>
-        </div>
-        <div class="w-12 h-12 bg-red-50 text-red-500 rounded-lg flex items-center justify-center text-xl">🔴</div>
-      </div>
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Peringatan (Bulan Depan)</p>
-          <h3 id="stat-warning" class="text-3xl font-bold text-amber-500 mt-1">0</h3>
-        </div>
-        <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-lg flex items-center justify-center text-xl">🟡</div>
-      </div>
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Terjadwal</p>
-          <h3 id="stat-total" class="text-3xl font-bold text-gray-900 mt-1">0</h3>
-        </div>
-        <div class="w-12 h-12 bg-gray-50 text-gray-500 rounded-lg flex items-center justify-center text-xl">📋</div>
-      </div>
-    </div>
-
-    <div id="loading" class="space-y-4">
-      <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-      <div class="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-      <div class="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-    </div>
-
-    <div id="tableContainer" class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-left">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th scope="col" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">No</th>
-              <th scope="col" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Divisi</th>
-              <th scope="col" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kegiatan & Aspek</th>
-              <th scope="col" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">Siklus</th>
-              <th scope="col" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-48">Batas Waktu</th>
-              <th scope="col" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-40 text-center">Status Alarm</th>
-            </tr>
-          </thead>
-          <tbody id="dataBody" class="divide-y divide-gray-200 bg-white">
-            </tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-
-  <script>
-    // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWOm3O52G3RWX1HPDXFEXVxYwfXQyf2EsNESVNkXn1jSnqk1GlgM5uSx0gXV_SaQwp/exec';
-
-    const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
-
-    document.addEventListener("DOMContentLoaded", loadData);
-
-    async function loadData() {
-      try {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+                    colors: { 
+                        brand: { 950: '#450a0a', 900: '#7f1d1d', 800: '#991b1b', 700: '#b91c1c', 600: '#dc2626', 500: '#ef4444', 100: '#fee2e2', 50: '#fef2f2' } 
+                    },
+                    boxShadow: {
+                        'timbul': '0 20px 40px -15px rgba(69, 10, 10, 0.12), 0 15px 30px -20px rgba(220, 38, 38, 0.15), inset 0 1px 0 rgba(255,255,255,0.6)',
+                        'timbul-lg': '0 30px 60px -15px rgba(69, 10, 10, 0.2), 0 25px 45px -20px rgba(220, 38, 38, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; -webkit-tap-highlight-color: transparent; }
+        .bg-mesh { background-color: #7f1d1d; background-image: radial-gradient(at 0% 0%, #991b1b 0px, transparent 50%), radial-gradient(at 100% 100%, #b91c1c 0px, transparent 50%); }
+        html { scroll-behavior: smooth; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        if (data.error) {
-          alert("Error Server: " + data.message);
-          return;
-        }
+        /* Custom scrollbar untuk list */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 font-sans antialiased">
 
-        processAndRender(data);
-      } catch (error) {
-        console.error("Fetch error:", error);
-        alert("Gagal memuat data. Periksa CORS atau Deployment Apps Script Anda.");
-      }
-    }
-
-    // Fungsi Pembantu Pencari Urutan Waktu Berdasarkan Bulan Terdekat
-    function getMonthWeight(text) {
-      if (!text || text === 'Tidak ditentukan') return 999;
-      const lower = text.toLowerCase();
-      
-      // Jika berisi rentang waktu, ambil bulan pertama yang disebut
-      for (let i = 0; i < monthOrder.length; i++) {
-        if (lower.includes(monthOrder[i])) {
-          return i; // Mengembalikan index 0-11
-        }
-      }
-      return 500; // Jika berkala rutin seperti 'Semesteran/Tahunan' tanpa nama bulan konkret
-    }
-
-    function processAndRender(data) {
-      // 1. URUTKAN BERDASARKAN WAKTU KRONOLOGIS
-      data.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
-
-      let criticalCount = 0;
-      let warningCount = 0;
-      
-      const tbody = document.getElementById('dataBody');
-      let html = '';
-
-      data.forEach((item, index) => {
-        const timeText = item.batasWaktu.toLowerCase();
+    <header class="w-full bg-mesh text-white px-6 md:px-10 pt-12 md:pt-16 pb-24 md:pb-28 rounded-b-[2rem] md:rounded-b-[3rem] shadow-timbul-lg relative overflow-hidden animate-slide-up z-10">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
         
-        // 2. LOGIKA ALARM OTOMATIS BERDASARKAN WARNA (Current context: Juli 2026)
-        let alarmBadge = '';
-        let rowHighlight = 'bg-white';
+        <div class="relative z-10 flex flex-col items-start text-left max-w-7xl mx-auto w-full">
+            <span class="text-[10px] md:text-xs font-bold tracking-widest text-brand-100 uppercase mb-3 inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/10">Admin Dashboard</span>
+            <h1 class="font-serif text-3xl md:text-5xl font-bold leading-tight">Monitoring Seluruh Layanan</h1>
+            <p class="text-brand-100/90 text-sm md:text-base mt-2 md:mt-3 max-w-2xl font-normal">Pantau antrean dari semua jenis layanan administrasi akademik dalam satu tempat.</p>
+        </div>
+    </header>
 
-        if (timeText.includes('juli')) {
-          // Alarm Kritis - Bulan Ini
-          criticalCount++;
-          rowHighlight = 'bg-red-50/40 hover:bg-red-50/80';
-          alarmBadge = `
-            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-red-100 text-red-800 animate-pulse-slow border border-red-200">
-              <span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span>
-              Kritis (Bulan Ini)
-            </span>
-          `;
-        } else if (timeText.includes('agustus')) {
-          // Peringatan - Bulan Depan
-          warningCount++;
-          rowHighlight = 'bg-amber-50/30 hover:bg-amber-50/60';
-          alarmBadge = `
-            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-              <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span>
-              Mendekati Batas
-            </span>
-          `;
-        } else {
-          // Kondisi Terjadwal Aman
-          alarmBadge = `
-            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-              <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-1.5"></span>
-              Terjadwal
-            </span>
-          `;
+    <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-12 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
+        
+        <div class="bg-white rounded-3xl md:rounded-[2.5rem] shadow-sm md:shadow-md border border-slate-100 p-5 md:p-10 w-full min-h-[50vh] animate-slide-up" style="animation-delay: 0.1s;">
+            
+            <div class="flex items-center gap-3 md:gap-4 mb-6 pb-4 border-b border-slate-100">
+                <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
+                    <i class="fas fa-chart-pie text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-extrabold text-xl md:text-2xl text-slate-800 leading-none">Status Antrean</h2>
+                    <p class="text-xs md:text-sm font-medium text-slate-500 mt-1">Daftar berkas yang sedang menunggu proses</p>
+                </div>
+            </div>
+
+            <div id="loadingData" class="text-center py-16">
+                <div class="inline-block relative w-12 h-12 mb-4">
+                    <div class="absolute inset-0 border-4 border-brand-100 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-brand-600 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <p class="text-slate-500 text-sm font-semibold">Mengambil data layanan terbaru...</p>
+            </div>
+
+            <div id="errorState" class="hidden text-center py-12 bg-rose-50 rounded-2xl md:rounded-[2rem] border border-rose-100">
+                <div class="w-16 h-16 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                </div>
+                <p class="text-rose-600 font-bold mb-1">Gagal Memuat Data</p>
+                <p class="text-slate-500 text-sm" id="pesanError"></p>
+            </div>
+
+            <div id="dashboard-container" class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
+                </div>
+
+        </div>
+    </main>
+
+    <footer class="w-full text-center py-8 text-slate-400 text-xs font-bold tracking-wider mt-auto border-t border-slate-200 bg-white z-10">
+        &copy; 2026 Admin Administrasi Akademik
+    </footer>
+
+    <script>
+        // URL SCRIPT ADMIN DASHBOARD
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6WmipOLEkRgbeX1DiTlbGl-U0QgcAKqTOfoUS4ceAwHtt7McInBmlNDi5MI7hPEQ/exec';
+
+        async function fetchSemuaLayanan() {
+            const dataLama = localStorage.getItem('sijillat_cache');
+            
+            if (dataLama) {
+                renderDashboard(JSON.parse(dataLama));
+                const loadingEl = document.getElementById('loadingData');
+                loadingEl.classList.remove('py-16');
+                loadingEl.innerHTML = `<p class="text-brand-600 bg-brand-50 rounded-full py-2 px-4 border border-brand-100 text-xs font-bold animate-pulse text-center w-fit mx-auto mb-4"><i class="fas fa-sync fa-spin mr-1.5"></i> Memperbarui data...</p>`;
+                loadingEl.classList.remove('hidden');
+            }
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getAllUmurAjuan`);
+                const result = await response.json();
+
+                if (result.error) {
+                    if (!dataLama) showError(result.error);
+                    return;
+                }
+
+                localStorage.setItem('sijillat_cache', JSON.stringify(result.data));
+                renderDashboard(result.data);
+            } catch (error) {
+                if (!dataLama) {
+                    showError("Tidak dapat terhubung ke server Google. Pastikan koneksi internet stabil.");
+                }
+                document.getElementById('loadingData').classList.add('hidden');
+            }
         }
 
-        html += `
-          <tr class="${rowHighlight} transition-colors duration-150">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-400">${index + 1}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="text-sm font-bold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-md">${item.divisi}</span>
-            </td>
-            <td class="px-6 py-4">
-              <div class="text-sm font-semibold text-gray-900 max-w-xl break-words">${item.kegiatan}</div>
-              ${item.aspek && item.aspek !== "" ? `<div class="text-xs text-gray-500 mt-1 bg-gray-50 p-2 rounded border border-gray-100 max-w-xl whitespace-pre-line">${item.aspek}</div>` : ''}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-              <span class="px-2 py-0.5 border border-gray-200 rounded text-xs bg-white">${item.siklus}</span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-              ${item.batasWaktu}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center">
-              ${alarmBadge}
-            </td>
-          </tr>
-        `;
-      });
+        function showError(message) {
+            document.getElementById('loadingData').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('pesanError').innerText = message;
+        }
 
-      // Update Panel Statistik Atas
-      document.getElementById('stat-critical').innerText = criticalCount;
-      document.getElementById('stat-warning').innerText = warningCount;
-      document.getElementById('stat-total').innerText = data.length;
+        function renderDashboard(dataArray) {
+            document.getElementById('loadingData').classList.add('hidden');
+            const container = document.getElementById('dashboard-container');
+            container.classList.remove('hidden');
 
-      // Hilangkan Skeleton Loading & Tampilkan Tabel Utama
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('tableContainer').classList.remove('hidden');
-      
-      tbody.innerHTML = html;
-    }
-  </script>
+            let gridHtml = '';
+
+            dataArray.forEach((layanan, index) => {
+                let listHtml = '';
+                let warnaBadge = layanan.jumlah > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
+
+                if (layanan.umurData && layanan.umurData.length > 0) {
+                    layanan.umurData.forEach((umur, idx) => {
+                        listHtml += `
+                            <li class="py-3 flex items-center justify-between text-slate-600 hover:bg-slate-50 rounded-xl px-2 transition-colors border-b border-slate-100 last:border-0 -mx-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center shadow-sm text-[10px] font-bold shrink-0">
+                                        ${idx + 1}
+                                    </div>
+                                    <div class="text-sm font-medium">Usia: <span class="font-extrabold text-brand-700">${umur}</span></div>
+                                </div>
+                                <a href="${layanan.linkAksi}" target="_blank" class="shrink-0 bg-brand-50 hover:bg-brand-600 text-brand-600 hover:text-white border border-brand-100 hover:border-brand-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                                    Aksi <i class="fas fa-external-link-alt text-[10px]"></i>
+                                </a>
+                            </li>
+                        `;
+                    });
+                } else {
+                    listHtml = `
+                        <li class="py-10 flex flex-col items-center justify-center text-slate-400 text-center">
+                            <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-check text-xl text-emerald-500"></i>
+                            </div>
+                            <span class="font-bold text-slate-600 text-sm">Tidak ada antrean</span>
+                        </li>
+                    `;
+                }
+
+                gridHtml += `
+                    <div class="bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200/80 p-5 md:p-6 flex flex-col h-full animate-slide-up" style="animation-delay: ${index * 0.05}s;">
+                        <div class="flex items-start justify-between mb-4 gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white text-brand-600 rounded-[12px] flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
+                                    <i class="fas fa-folder-open text-sm"></i>
+                                </div>
+                                <h3 class="font-extrabold text-lg text-slate-800 leading-tight">${layanan.layanan}</h3>
+                            </div>
+                            <div class="${warnaBadge} px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex flex-col items-center shrink-0 border border-slate-200/60">
+                                <span class="text-lg leading-none">${layanan.jumlah}</span>
+                                <span class="text-[9px] uppercase tracking-wider opacity-80 mt-0.5">Ajuan</span>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 flex-1 overflow-y-auto custom-scrollbar shadow-sm" style="max-height: 250px;">
+                            <ul class="m-0 p-0 list-none">
+                                ${listHtml}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = gridHtml;
+        }
+
+        window.onload = fetchSemuaLayanan;
+    </script>
 </body>
 </html>
