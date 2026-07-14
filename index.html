@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#7f1d1d">
-    <title>Program Kerja Divisi</title>
+    <title>Dashboard Alur Kerja Rutin Divisi</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -32,9 +32,10 @@
         html { scroll-behavior: smooth; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         
         /* Custom scrollbar untuk list */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -46,24 +47,60 @@
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
         
         <div class="relative z-10 flex flex-col items-start text-left max-w-7xl mx-auto w-full">
-            <span class="text-[10px] md:text-xs font-bold tracking-widest text-brand-100 uppercase mb-3 inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/10">Admin Dashboard</span>
-            <h1 class="font-serif text-3xl md:text-5xl font-bold leading-tight">Monitoring Seluruh Layanan</h1>
-            <p class="text-brand-100/90 text-sm md:text-base mt-2 md:mt-3 max-w-2xl font-normal">Pantau antrean dari semua jenis layanan administrasi akademik dalam satu tempat.</p>
+            <span class="text-[10px] md:text-xs font-bold tracking-widest text-brand-100 uppercase mb-3 inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/10">Sistem Pengingat</span>
+            <h1 class="font-serif text-3xl md:text-5xl font-bold leading-tight">Monitoring Pekerjaan Rutin</h1>
+            <p class="text-brand-100/90 text-sm md:text-base mt-2 md:mt-3 max-w-2xl font-normal">Pantau alur kerja, siklus evaluasi, dan batas waktu pengerjaan tugas setiap divisi secara teratur.</p>
         </div>
     </header>
 
     <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-12 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
         
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 animate-slide-up animate-delay-100">
+            <div class="bg-white rounded-2xl md:rounded-[1.5rem] p-5 border border-red-100 shadow-sm flex items-center justify-between transition-all hover:scale-[1.02] duration-350">
+                <div>
+                    <p class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Alarm Kritis (Bulan Ini)</p>
+                    <h3 id="stat-critical" class="text-3xl font-black text-red-700 mt-1">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0">
+                    <i class="fas fa-exclamation-circle animate-pulse"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl md:rounded-[1.5rem] p-5 border border-amber-100 shadow-sm flex items-center justify-between transition-all hover:scale-[1.02] duration-350">
+                <div>
+                    <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Peringatan (Bulan Depan)</p>
+                    <h3 id="stat-warning" class="text-3xl font-black text-amber-700 mt-1">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl md:rounded-[1.5rem] p-5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:scale-[1.02] duration-350">
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Terjadwal</p>
+                    <h3 id="stat-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-slate-50 text-slate-500 rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0">
+                    <i class="fas fa-list-check"></i>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white rounded-3xl md:rounded-[2.5rem] shadow-sm md:shadow-md border border-slate-100 p-5 md:p-10 w-full min-h-[50vh] animate-slide-up" style="animation-delay: 0.1s;">
             
-            <div class="flex items-center gap-3 md:gap-4 mb-6 pb-4 border-b border-slate-100">
-                <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
-                    <i class="fas fa-chart-pie text-xl"></i>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3 md:gap-4">
+                    <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
+                        <i class="fas fa-calendar-check text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-extrabold text-xl md:text-2xl text-slate-800 leading-none">Daftar Kegiatan Rutin</h2>
+                        <p class="text-xs md:text-sm font-medium text-slate-500 mt-1">Pekerjaan diurutkan kronologis berdasarkan batas waktu terdekat</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="font-extrabold text-xl md:text-2xl text-slate-800 leading-none">Status Antrean</h2>
-                    <p class="text-xs md:text-sm font-medium text-slate-500 mt-1">Daftar berkas yang sedang menunggu proses</p>
-                </div>
+                <span id="syncStatus" class="flex items-center text-[10px] md:text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-100 w-fit">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                    Database Connected
+                </span>
             </div>
 
             <div id="loadingData" class="text-center py-16">
@@ -71,7 +108,7 @@
                     <div class="absolute inset-0 border-4 border-brand-100 rounded-full"></div>
                     <div class="absolute inset-0 border-4 border-brand-600 rounded-full border-t-transparent animate-spin"></div>
                 </div>
-                <p class="text-slate-500 text-sm font-semibold">Mengambil data layanan terbaru...</p>
+                <p class="text-slate-500 text-sm font-semibold">Mengambil data alur kerja terbaru...</p>
             </div>
 
             <div id="errorState" class="hidden text-center py-12 bg-rose-50 rounded-2xl md:rounded-[2rem] border border-rose-100">
@@ -82,8 +119,24 @@
                 <p class="text-slate-500 text-sm" id="pesanError"></p>
             </div>
 
-            <div id="dashboard-container" class="hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
+            <div id="tableContainer" class="hidden overflow-hidden border border-slate-100 rounded-2xl md:rounded-[1.5rem] shadow-sm">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-slate-100 text-left">
+                        <thead class="bg-slate-50/75 border-b border-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-16">No</th>
+                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-32">Divisi</th>
+                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kegiatan & Aspek Penilaian</th>
+                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-32">Siklus</th>
+                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-44">Batas Waktu</th>
+                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-40 text-center">Status Alarm</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataBody" class="divide-y divide-slate-100 bg-white">
+                            </tbody>
+                    </table>
                 </div>
+            </div>
 
         </div>
     </main>
@@ -93,34 +146,44 @@
     </footer>
 
     <script>
-        // URL SCRIPT ADMIN DASHBOARD
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6WmipOLEkRgbeX1DiTlbGl-U0QgcAKqTOfoUS4ceAwHtt7McInBmlNDi5MI7hPEQ/exec';
+        // URL SCRIPT MONITORING PEKERJAAN RUTIN
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWOm3O52G3RWX1HPDXFEXVxYwfXQyf2EsNESVNkXn1jSnqk1GlgM5uSx0gXV_SaQwp/exec';
 
-        async function fetchSemuaLayanan() {
-            const dataLama = localStorage.getItem('sijillat_cache');
+        const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+
+        document.addEventListener("DOMContentLoaded", loadData);
+
+        async function loadData() {
+            // Gunakan caching agar data yang lama segera muncul dan tidak merusak keindahan visual saat memuat
+            const cachedData = localStorage.getItem('pekerjaan_rutin_cache');
             
-            if (dataLama) {
-                renderDashboard(JSON.parse(dataLama));
+            if (cachedData) {
+                processAndRender(JSON.parse(cachedData));
                 const loadingEl = document.getElementById('loadingData');
                 loadingEl.classList.remove('py-16');
-                loadingEl.innerHTML = `<p class="text-brand-600 bg-brand-50 rounded-full py-2 px-4 border border-brand-100 text-xs font-bold animate-pulse text-center w-fit mx-auto mb-4"><i class="fas fa-sync fa-spin mr-1.5"></i> Memperbarui data...</p>`;
+                loadingEl.innerHTML = `
+                    <div class="flex items-center justify-center gap-2 text-brand-700 bg-brand-50 rounded-full py-2 px-4 border border-brand-100 text-xs font-bold animate-pulse text-center w-fit mx-auto mb-4 shadow-sm">
+                        <i class="fas fa-sync fa-spin"></i> Memperbarui data...
+                    </div>
+                `;
                 loadingEl.classList.remove('hidden');
             }
 
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=getAllUmurAjuan`);
-                const result = await response.json();
-
-                if (result.error) {
-                    if (!dataLama) showError(result.error);
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                if (data.error) {
+                    if (!cachedData) showError(data.message);
                     return;
                 }
 
-                localStorage.setItem('sijillat_cache', JSON.stringify(result.data));
-                renderDashboard(result.data);
+                localStorage.setItem('pekerjaan_rutin_cache', JSON.stringify(data));
+                processAndRender(data);
             } catch (error) {
-                if (!dataLama) {
-                    showError("Tidak dapat terhubung ke server Google. Pastikan koneksi internet stabil.");
+                console.error("Fetch error:", error);
+                if (!cachedData) {
+                    showError("Gagal mengambil data dari Google Server. Harap pastikan koneksi stabil.");
                 }
                 document.getElementById('loadingData').classList.add('hidden');
             }
@@ -128,75 +191,117 @@
 
         function showError(message) {
             document.getElementById('loadingData').classList.add('hidden');
+            document.getElementById('tableContainer').classList.add('hidden');
             document.getElementById('errorState').classList.remove('hidden');
             document.getElementById('pesanError').innerText = message;
         }
 
-        function renderDashboard(dataArray) {
-            document.getElementById('loadingData').classList.add('hidden');
-            const container = document.getElementById('dashboard-container');
-            container.classList.remove('hidden');
+        // Helper untuk mengurutkan data secara kronologis berdasarkan bulan
+        function getMonthWeight(text) {
+            if (!text || text === 'Tidak ditentukan') return 999;
+            const lower = text.toLowerCase();
+            
+            for (let i = 0; i < monthOrder.length; i++) {
+                if (lower.includes(monthOrder[i])) {
+                    return i; 
+                }
+            }
+            return 500; // Untuk siklus terjadwal umum seperti Semesteran/Tahunan tanpa bulan eksplisit
+        }
 
-            let gridHtml = '';
+        function processAndRender(data) {
+            // Urutkan data secara kronologis berdasarkan bulan
+            data.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
 
-            dataArray.forEach((layanan, index) => {
-                let listHtml = '';
-                let warnaBadge = layanan.jumlah > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
+            let criticalCount = 0;
+            let warningCount = 0;
+            
+            const tbody = document.getElementById('dataBody');
+            let html = '';
 
-                if (layanan.umurData && layanan.umurData.length > 0) {
-                    layanan.umurData.forEach((umur, idx) => {
-                        listHtml += `
-                            <li class="py-3 flex items-center justify-between text-slate-600 hover:bg-slate-50 rounded-xl px-2 transition-colors border-b border-slate-100 last:border-0 -mx-2">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-7 h-7 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center shadow-sm text-[10px] font-bold shrink-0">
-                                        ${idx + 1}
-                                    </div>
-                                    <div class="text-sm font-medium">Usia: <span class="font-extrabold text-brand-700">${umur}</span></div>
-                                </div>
-                                <a href="${layanan.linkAksi}" target="_blank" class="shrink-0 bg-brand-50 hover:bg-brand-600 text-brand-600 hover:text-white border border-brand-100 hover:border-brand-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
-                                    Aksi <i class="fas fa-external-link-alt text-[10px]"></i>
-                                </a>
-                            </li>
-                        `;
-                    });
+            data.forEach((item, index) => {
+                const timeText = item.batasWaktu.toLowerCase();
+                
+                // Alarm otomatis berdasarkan warna tanpa suara (Context: Juli 2026)
+                let alarmBadge = '';
+                let rowHighlight = 'hover:bg-slate-50/70';
+
+                if (timeText.includes('juli')) {
+                    criticalCount++;
+                    rowHighlight = 'bg-red-50/30 hover:bg-red-50/60';
+                    alarmBadge = `
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200/80 shadow-sm">
+                            <span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-2"></span>
+                            Bulan Ini (Kritis)
+                        </span>
+                    `;
+                } else if (timeText.includes('agustus')) {
+                    warningCount++;
+                    rowHighlight = 'bg-amber-50/20 hover:bg-amber-50/50';
+                    alarmBadge = `
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200/80 shadow-sm">
+                            <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></span>
+                            Bulan Depan
+                        </span>
+                    `;
                 } else {
-                    listHtml = `
-                        <li class="py-10 flex flex-col items-center justify-center text-slate-400 text-center">
-                            <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mb-2">
-                                <i class="fas fa-check text-xl text-emerald-500"></i>
-                            </div>
-                            <span class="font-bold text-slate-600 text-sm">Tidak ada antrean</span>
-                        </li>
+                    alarmBadge = `
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/60 shadow-sm">
+                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mr-2"></span>
+                            Terjadwal
+                        </span>
                     `;
                 }
 
-                gridHtml += `
-                    <div class="bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200/80 p-5 md:p-6 flex flex-col h-full animate-slide-up" style="animation-delay: ${index * 0.05}s;">
-                        <div class="flex items-start justify-between mb-4 gap-2">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-white text-brand-600 rounded-[12px] flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
-                                    <i class="fas fa-folder-open text-sm"></i>
+                html += `
+                    <tr class="${rowHighlight} transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-400">${index + 1}</td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-xs font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2.5 py-1.5 rounded-lg shadow-sm inline-block">
+                                ${item.divisi}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-bold text-slate-800 max-w-xl break-words leading-snug">${item.kegiatan}</div>
+                            ${item.aspek && item.aspek !== "" ? `
+                                <div class="text-xs text-slate-500 mt-2 bg-slate-50/80 p-3 rounded-xl border border-slate-100 max-w-xl whitespace-pre-line leading-relaxed font-normal">
+                                    ${item.aspek}
                                 </div>
-                                <h3 class="font-extrabold text-lg text-slate-800 leading-tight">${layanan.layanan}</h3>
+                            ` : ''}
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                            <span class="px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-slate-600 shadow-sm">
+                                ${item.siklus}
+                            </span>
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700">
+                            ${item.batasWaktu}
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="flex justify-center">
+                                ${alarmBadge}
                             </div>
-                            <div class="${warnaBadge} px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex flex-col items-center shrink-0 border border-slate-200/60">
-                                <span class="text-lg leading-none">${layanan.jumlah}</span>
-                                <span class="text-[9px] uppercase tracking-wider opacity-80 mt-0.5">Ajuan</span>
-                            </div>
-                        </div>
-                        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 flex-1 overflow-y-auto custom-scrollbar shadow-sm" style="max-height: 250px;">
-                            <ul class="m-0 p-0 list-none">
-                                ${listHtml}
-                            </ul>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 `;
             });
 
-            container.innerHTML = gridHtml;
-        }
+            // Update Panel Statistik Atas secara instan
+            document.getElementById('stat-critical').innerText = criticalCount;
+            document.getElementById('stat-warning').innerText = warningCount;
+            document.getElementById('stat-total').innerText = data.length;
 
-        window.onload = fetchSemuaLayanan;
+            // Hilangkan status loading dan tampilkan tabel
+            document.getElementById('loadingData').classList.add('hidden');
+            document.getElementById('tableContainer').classList.remove('hidden');
+            
+            tbody.innerHTML = html;
+        }
     </script>
 </body>
 </html>
