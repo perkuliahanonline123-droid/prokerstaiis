@@ -55,7 +55,6 @@
 
     <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-14 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
         
-        <!-- Panel Statistik -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up animate-delay-100">
             <div class="bg-white rounded-[1.25rem] p-5 border border-red-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
                 <div>
@@ -88,8 +87,7 @@
 
         <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 p-5 md:p-8 w-full animate-slide-up" style="animation-delay: 0.1s;">
             
-            <!-- Area Header Tabel & Filter -->
-            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
                         <i class="fas fa-calendar-check text-lg"></i>
@@ -100,22 +98,13 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <!-- Dropdown Filter Divisi -->
-                    <div class="relative">
-                        <select id="filterDivisi" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg focus:ring-brand-500 focus:border-brand-500 block w-full sm:w-48 p-2.5 pr-8 cursor-pointer shadow-sm outline-none transition-all">
-                            <option value="all">Semua Divisi</option>
-                            <!-- Opsi akan di-generate otomatis -->
+                <div class="relative w-full sm:w-auto">
+                    <select id="filterDivisi" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg focus:ring-brand-500 focus:border-brand-500 block w-full sm:w-56 p-2.5 pr-8 cursor-pointer shadow-sm outline-none transition-all">
+                        <option value="all">Semua Divisi</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <i class="fas fa-chevron-down text-xs"></i>
                     </div>
-                    
-                    <span id="syncStatus" class="flex items-center text-[10px] font-bold bg-emerald-50 text-emerald-700 px-3 py-2 sm:py-1.5 rounded-lg sm:rounded-full border border-emerald-100 w-full sm:w-fit justify-center">
-                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
-                        Database Connected
-                    </span>
                 </div>
             </div>
 
@@ -140,20 +129,18 @@
                     <table class="min-w-full divide-y divide-slate-200 text-left">
                         <thead class="bg-slate-50">
                             <tr>
-                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">No</th>
-                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Divisi</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">No</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-32">Divisi</th>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-1/2">Kegiatan & Aspek Penilaian</th>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Batas Waktu & Siklus</th>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody id="dataBody" class="divide-y divide-slate-100 bg-white">
-                            <!-- Data Injected Here -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
                 
-                <!-- Pesan jika data tidak ditemukan saat difilter -->
                 <div id="emptyState" class="hidden text-center py-12">
                     <div class="w-12 h-12 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
                         <i class="fas fa-folder-open text-xl"></i>
@@ -174,11 +161,10 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWOm3O52G3RWX1HPDXFEXVxYwfXQyf2EsNESVNkXn1jSnqk1GlgM5uSx0gXV_SaQwp/exec';
         const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
         
-        let allData = []; // Menyimpan semua data asli untuk keperluan filter
+        let allData = [];
 
         document.addEventListener("DOMContentLoaded", loadData);
 
-        // Event listener untuk Filter Divisi
         document.getElementById('filterDivisi').addEventListener('change', function(e) {
             const selectedDivisi = e.target.value;
             if (selectedDivisi === 'all') {
@@ -216,12 +202,11 @@
                     return;
                 }
 
-                allData = data; // Simpan ke global scope
+                allData = data; 
                 localStorage.setItem('pekerjaan_rutin_cache', JSON.stringify(data));
                 
                 populateDivisiFilter(allData);
                 
-                // Pertahankan filter jika sedang aktif saat auto-refresh selesai
                 const currentFilter = document.getElementById('filterDivisi').value;
                 if (currentFilter === 'all') {
                     processAndRender(allData);
@@ -246,24 +231,20 @@
             document.getElementById('pesanError').innerText = message;
         }
 
-        // Fungsi untuk mengisi opsi dropdown secara dinamis
         function populateDivisiFilter(data) {
             const filterSelect = document.getElementById('filterDivisi');
             const currentSelection = filterSelect.value;
             
-            // Ambil nama divisi unik, hapus yg kosong, lalu urutkan abjad
             const uniqueDivisions = [...new Set(data.map(item => item.divisi))]
                                     .filter(Boolean)
                                     .sort();
             
-            // Reset opsi menjadi "Semua Divisi" saja
             filterSelect.innerHTML = '<option value="all">Semua Divisi</option>';
             
             uniqueDivisions.forEach(divisi => {
                 const option = document.createElement('option');
                 option.value = divisi;
                 option.textContent = divisi;
-                // Pertahankan pilihan user jika ada refresh background
                 if (divisi === currentSelection) {
                     option.selected = true;
                 }
@@ -280,6 +261,20 @@
             return 500; 
         }
 
+        // Fungsi interaktif untuk Accordion Aspek
+        window.toggleAspek = function(index) {
+            const content = document.getElementById(`aspek-content-${index}`);
+            const icon = document.getElementById(`aspek-icon-${index}`);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
         function processAndRender(data) {
             const tbody = document.getElementById('dataBody');
             const table = document.querySelector('table');
@@ -288,23 +283,19 @@
             document.getElementById('loadingData').classList.add('hidden');
             document.getElementById('tableContainer').classList.remove('hidden');
 
-            // Handle jika data kosong setelah difilter
             if (!data || data.length === 0) {
                 table.classList.add('hidden');
                 emptyState.classList.remove('hidden');
                 
-                // Reset statistik
                 document.getElementById('stat-critical').innerText = 0;
                 document.getElementById('stat-warning').innerText = 0;
                 document.getElementById('stat-total').innerText = 0;
                 return;
             }
 
-            // Tampilkan kembali tabel jika ada data
             table.classList.remove('hidden');
             emptyState.classList.add('hidden');
 
-            // Copy data agar tidak merusak array asli (allData) saat di sort
             const dataToRender = [...data];
             dataToRender.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
 
@@ -341,33 +332,45 @@
                     `;
                 }
 
+                // Cek apakah ada teks aspek untuk mengaktifkan fitur accordion
+                const hasAspek = item.aspek && item.aspek.trim() !== "";
+
                 html += `
                     <tr class="${rowHighlight} transition-colors duration-150 group">
-                        <td class="px-5 py-4 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">${index + 1}</td>
+                        <td class="px-5 py-5 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">${index + 1}</td>
                         
-                        <td class="px-5 py-4 whitespace-nowrap align-top">
-                            <span class="text-[11px] font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2.5 py-1 rounded-md">
+                        <td class="px-5 py-5 whitespace-nowrap align-top">
+                            <span class="text-sm font-bold text-brand-800 bg-brand-50 border border-brand-200 px-3 py-1.5 rounded-lg inline-block">
                                 ${item.divisi}
                             </span>
                         </td>
                         
-                        <td class="px-5 py-4 align-top">
-                            <div class="text-sm font-semibold text-slate-800 leading-snug">${item.kegiatan}</div>
-                            ${item.aspek && item.aspek !== "" ? `
-                                <div class="text-xs text-slate-500 mt-2 pl-3 border-l-2 border-slate-200 whitespace-pre-line leading-relaxed">
+                        <td class="px-5 py-5 align-top">
+                            <div class="flex items-start justify-between ${hasAspek ? 'cursor-pointer hover:text-brand-700 transition-colors' : ''}" 
+                                 ${hasAspek ? `onclick="toggleAspek(${index})"` : ''}>
+                                <div class="text-sm font-bold text-slate-800 leading-snug pr-4">${item.kegiatan}</div>
+                                ${hasAspek ? `
+                                    <div class="mt-0.5 shrink-0 bg-slate-100 p-1.5 rounded-md text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all">
+                                        <i id="aspek-icon-${index}" class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            ${hasAspek ? `
+                                <div id="aspek-content-${index}" class="hidden text-sm text-slate-600 mt-3 pl-3 border-l-2 border-brand-300 whitespace-pre-line leading-relaxed">
                                     ${item.aspek}
                                 </div>
                             ` : ''}
                         </td>
                         
-                        <td class="px-5 py-4 align-top">
-                            <div class="text-sm font-semibold text-slate-800 leading-snug">${item.batasWaktu}</div>
-                            <div class="text-xs text-slate-500 mt-2 pl-3 border-l-2 border-slate-200">
+                        <td class="px-5 py-5 align-top">
+                            <div class="text-sm font-bold text-slate-800 leading-snug">${item.batasWaktu}</div>
+                            <div class="text-xs font-medium text-slate-500 mt-1">
                                 ${item.siklus}
                             </div>
                         </td>
                         
-                        <td class="px-5 py-4 whitespace-nowrap text-center align-top">
+                        <td class="px-5 py-5 whitespace-nowrap text-center align-top">
                             <div class="flex justify-center">
                                 ${alarmBadge}
                             </div>
@@ -376,7 +379,6 @@
                 `;
             });
 
-            // Update Panel Statistik
             document.getElementById('stat-critical').innerText = criticalCount;
             document.getElementById('stat-warning').innerText = warningCount;
             document.getElementById('stat-total').innerText = dataToRender.length;
