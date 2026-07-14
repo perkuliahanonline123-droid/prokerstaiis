@@ -43,20 +43,20 @@
 </head>
 <body class="flex flex-col min-h-screen text-slate-800 font-sans antialiased">
 
-    <header class="w-full bg-mesh text-white px-6 md:px-10 pt-12 md:pt-16 pb-24 md:pb-28 rounded-b-[2rem] md:rounded-b-[3rem] shadow-timbul-lg relative overflow-hidden animate-slide-up z-10">
+    <header class="w-full bg-mesh text-white px-6 md:px-10 pt-12 md:pt-14 pb-20 md:pb-24 rounded-b-[2rem] md:rounded-b-[2.5rem] shadow-timbul-lg relative overflow-hidden animate-slide-up z-10">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
         
         <div class="relative z-10 flex flex-col items-start text-left max-w-7xl mx-auto w-full">
             <span class="text-[10px] md:text-xs font-bold tracking-widest text-brand-100 uppercase mb-3 inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/10">Sistem Pengingat</span>
-            <h1 class="font-serif text-3xl md:text-5xl font-bold leading-tight">Monitoring Pekerjaan Rutin</h1>
+            <h1 class="font-serif text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">Monitoring Pekerjaan Rutin</h1>
             <p class="text-brand-100/90 text-sm md:text-base mt-2 md:mt-3 max-w-2xl font-normal">Pantau alur kerja, siklus evaluasi, dan batas waktu pengerjaan tugas setiap divisi secara teratur.</p>
         </div>
     </header>
 
-    <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-12 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
+    <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-14 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 animate-slide-up animate-delay-100">
-            <div class="bg-white rounded-2xl md:rounded-[1.5rem] p-5 border border-red-100 shadow-sm flex items-center justify-between transition-all hover:scale-[1.02] duration-350">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up animate-delay-100">
+            <div class="bg-white rounded-[1.25rem] p-5 border border-red-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
                 <div>
                     <p class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Alarm Kritis (Bulan Ini)</p>
                     <h3 id="stat-critical" class="text-3xl font-black text-red-700 mt-1">0</h3>
@@ -65,7 +65,7 @@
                     <i class="fas fa-exclamation-circle animate-pulse"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl md:rounded-[1.5rem] p-5 border border-amber-100 shadow-sm flex items-center justify-between transition-all hover:scale-[1.02] duration-350">
+            <div class="bg-white rounded-[1.25rem] p-5 border border-amber-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
                 <div>
                     <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Peringatan (Bulan Depan)</p>
                     <h3 id="stat-warning" class="text-3xl font-black text-amber-700 mt-1">0</h3>
@@ -74,7 +74,7 @@
                     <i class="fas fa-clock"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl md:rounded-[1.5rem] p-5 border border-slate-100 shadow-sm flex items-center justify-between transition-all hover:scale-[1.02] duration-350">
+            <div class="bg-white rounded-[1.25rem] p-5 border border-slate-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
                 <div>
                     <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Terjadwal</p>
                     <h3 id="stat-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
@@ -85,51 +85,51 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-3xl md:rounded-[2.5rem] shadow-sm md:shadow-md border border-slate-100 p-5 md:p-10 w-full min-h-[50vh] animate-slide-up" style="animation-delay: 0.1s;">
+        <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 p-5 md:p-8 w-full animate-slide-up" style="animation-delay: 0.1s;">
             
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-                <div class="flex items-center gap-3 md:gap-4">
-                    <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
-                        <i class="fas fa-calendar-check text-xl"></i>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
+                        <i class="fas fa-calendar-check text-lg"></i>
                     </div>
                     <div>
-                        <h2 class="font-extrabold text-xl md:text-2xl text-slate-800 leading-none">Daftar Kegiatan Rutin</h2>
-                        <p class="text-xs md:text-sm font-medium text-slate-500 mt-1">Pekerjaan diurutkan kronologis berdasarkan batas waktu terdekat</p>
+                        <h2 class="font-extrabold text-xl text-slate-800 leading-none">Daftar Kegiatan Rutin</h2>
+                        <p class="text-xs font-medium text-slate-500 mt-1">Pekerjaan diurutkan berdasarkan batas waktu terdekat</p>
                     </div>
                 </div>
-                <span id="syncStatus" class="flex items-center text-[10px] md:text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-100 w-fit">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                <span id="syncStatus" class="flex items-center text-[10px] font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-100 w-fit">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
                     Database Connected
                 </span>
             </div>
 
             <div id="loadingData" class="text-center py-16">
-                <div class="inline-block relative w-12 h-12 mb-4">
+                <div class="inline-block relative w-10 h-10 mb-4">
                     <div class="absolute inset-0 border-4 border-brand-100 rounded-full"></div>
                     <div class="absolute inset-0 border-4 border-brand-600 rounded-full border-t-transparent animate-spin"></div>
                 </div>
                 <p class="text-slate-500 text-sm font-semibold">Mengambil data alur kerja terbaru...</p>
             </div>
 
-            <div id="errorState" class="hidden text-center py-12 bg-rose-50 rounded-2xl md:rounded-[2rem] border border-rose-100">
-                <div class="w-16 h-16 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+            <div id="errorState" class="hidden text-center py-12 bg-rose-50 rounded-2xl border border-rose-100">
+                <div class="w-12 h-12 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
                 </div>
-                <p class="text-rose-600 font-bold mb-1">Gagal Memuat Data</p>
-                <p class="text-slate-500 text-sm" id="pesanError"></p>
+                <p class="text-rose-600 font-bold text-sm mb-1">Gagal Memuat Data</p>
+                <p class="text-slate-500 text-xs" id="pesanError"></p>
             </div>
 
-            <div id="tableContainer" class="hidden overflow-hidden border border-slate-100 rounded-2xl md:rounded-[1.5rem] shadow-sm">
+            <div id="tableContainer" class="hidden overflow-hidden rounded-xl border border-slate-200">
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="min-w-full divide-y divide-slate-100 text-left">
-                        <thead class="bg-slate-50/75 border-b border-slate-100">
+                    <table class="min-w-full divide-y divide-slate-200 text-left">
+                        <thead class="bg-slate-50">
                             <tr>
-                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-16">No</th>
-                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-32">Divisi</th>
-                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kegiatan & Aspek Penilaian</th>
-                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-32">Siklus</th>
-                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-44">Batas Waktu</th>
-                                <th scope="col" class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-40 text-center">Status Alarm</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">No</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Divisi</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-full">Kegiatan & Aspek Penilaian</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Siklus</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Batas Waktu</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody id="dataBody" class="divide-y divide-slate-100 bg-white">
@@ -141,20 +141,17 @@
         </div>
     </main>
 
-    <footer class="w-full text-center py-8 text-slate-400 text-xs font-bold tracking-wider mt-auto border-t border-slate-200 bg-white z-10">
+    <footer class="w-full text-center py-6 text-slate-400 text-xs font-semibold tracking-wider mt-auto bg-transparent z-10">
         &copy; 2026 Admin Administrasi Akademik
     </footer>
 
     <script>
-        // URL SCRIPT MONITORING PEKERJAAN RUTIN
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWOm3O52G3RWX1HPDXFEXVxYwfXQyf2EsNESVNkXn1jSnqk1GlgM5uSx0gXV_SaQwp/exec';
-
         const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
 
         document.addEventListener("DOMContentLoaded", loadData);
 
         async function loadData() {
-            // Gunakan caching agar data yang lama segera muncul dan tidak merusak keindahan visual saat memuat
             const cachedData = localStorage.getItem('pekerjaan_rutin_cache');
             
             if (cachedData) {
@@ -162,7 +159,7 @@
                 const loadingEl = document.getElementById('loadingData');
                 loadingEl.classList.remove('py-16');
                 loadingEl.innerHTML = `
-                    <div class="flex items-center justify-center gap-2 text-brand-700 bg-brand-50 rounded-full py-2 px-4 border border-brand-100 text-xs font-bold animate-pulse text-center w-fit mx-auto mb-4 shadow-sm">
+                    <div class="flex items-center justify-center gap-2 text-brand-600 bg-brand-50 rounded-full py-1.5 px-4 border border-brand-100 text-[10px] font-bold animate-pulse text-center w-fit mx-auto mb-4 shadow-sm">
                         <i class="fas fa-sync fa-spin"></i> Memperbarui data...
                     </div>
                 `;
@@ -183,7 +180,7 @@
             } catch (error) {
                 console.error("Fetch error:", error);
                 if (!cachedData) {
-                    showError("Gagal mengambil data dari Google Server. Harap pastikan koneksi stabil.");
+                    showError("Gagal mengambil data dari server. Harap pastikan koneksi stabil.");
                 }
                 document.getElementById('loadingData').classList.add('hidden');
             }
@@ -196,21 +193,16 @@
             document.getElementById('pesanError').innerText = message;
         }
 
-        // Helper untuk mengurutkan data secara kronologis berdasarkan bulan
         function getMonthWeight(text) {
             if (!text || text === 'Tidak ditentukan') return 999;
             const lower = text.toLowerCase();
-            
             for (let i = 0; i < monthOrder.length; i++) {
-                if (lower.includes(monthOrder[i])) {
-                    return i; 
-                }
+                if (lower.includes(monthOrder[i])) return i; 
             }
-            return 500; // Untuk siklus terjadwal umum seperti Semesteran/Tahunan tanpa bulan eksplisit
+            return 500; 
         }
 
         function processAndRender(data) {
-            // Urutkan data secara kronologis berdasarkan bulan
             data.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
 
             let criticalCount = 0;
@@ -221,68 +213,64 @@
 
             data.forEach((item, index) => {
                 const timeText = item.batasWaktu.toLowerCase();
-                
-                // Alarm otomatis berdasarkan warna tanpa suara (Context: Juli 2026)
                 let alarmBadge = '';
-                let rowHighlight = 'hover:bg-slate-50/70';
+                let rowHighlight = 'hover:bg-slate-50';
 
                 if (timeText.includes('juli')) {
                     criticalCount++;
-                    rowHighlight = 'bg-red-50/30 hover:bg-red-50/60';
+                    rowHighlight = 'bg-red-50/20 hover:bg-red-50/50';
                     alarmBadge = `
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200/80 shadow-sm">
-                            <span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-2"></span>
-                            Bulan Ini (Kritis)
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200">
+                            <span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span> Bulan Ini
                         </span>
                     `;
                 } else if (timeText.includes('agustus')) {
                     warningCount++;
-                    rowHighlight = 'bg-amber-50/20 hover:bg-amber-50/50';
+                    rowHighlight = 'hover:bg-amber-50/30';
                     alarmBadge = `
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200/80 shadow-sm">
-                            <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></span>
-                            Bulan Depan
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> Bulan Depan
                         </span>
                     `;
                 } else {
                     alarmBadge = `
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/60 shadow-sm">
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mr-2"></span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
                             Terjadwal
                         </span>
                     `;
                 }
 
+                // Perbaikan align-top pada td agar rapi saat baris meninggi
                 html += `
-                    <tr class="${rowHighlight} transition-colors duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-400">${index + 1}</td>
+                    <tr class="${rowHighlight} transition-colors duration-150 group">
+                        <td class="px-5 py-4 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">${index + 1}</td>
                         
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-xs font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2.5 py-1.5 rounded-lg shadow-sm inline-block">
+                        <td class="px-5 py-4 whitespace-nowrap align-top">
+                            <span class="text-[11px] font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2.5 py-1 rounded-md">
                                 ${item.divisi}
                             </span>
                         </td>
                         
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-bold text-slate-800 max-w-xl break-words leading-snug">${item.kegiatan}</div>
+                        <td class="px-5 py-4 align-top">
+                            <div class="text-sm font-semibold text-slate-800 leading-snug">${item.kegiatan}</div>
                             ${item.aspek && item.aspek !== "" ? `
-                                <div class="text-xs text-slate-500 mt-2 bg-slate-50/80 p-3 rounded-xl border border-slate-100 max-w-xl whitespace-pre-line leading-relaxed font-normal">
+                                <div class="text-xs text-slate-500 mt-2 pl-3 border-l-2 border-slate-200 whitespace-pre-line leading-relaxed">
                                     ${item.aspek}
                                 </div>
                             ` : ''}
                         </td>
                         
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                            <span class="px-2.5 py-1 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-slate-600 shadow-sm">
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600 align-top">
+                            <span class="text-xs font-medium text-slate-600">
                                 ${item.siklus}
                             </span>
                         </td>
                         
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700">
+                        <td class="px-5 py-4 whitespace-nowrap text-sm font-semibold text-slate-700 align-top">
                             ${item.batasWaktu}
                         </td>
                         
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <td class="px-5 py-4 whitespace-nowrap text-center align-top">
                             <div class="flex justify-center">
                                 ${alarmBadge}
                             </div>
@@ -291,12 +279,10 @@
                 `;
             });
 
-            // Update Panel Statistik Atas secara instan
             document.getElementById('stat-critical').innerText = criticalCount;
             document.getElementById('stat-warning').innerText = warningCount;
             document.getElementById('stat-total').innerText = data.length;
 
-            // Hilangkan status loading dan tampilkan tabel
             document.getElementById('loadingData').classList.add('hidden');
             document.getElementById('tableContainer').classList.remove('hidden');
             
