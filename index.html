@@ -126,9 +126,8 @@
                             <tr>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">No</th>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Divisi</th>
-                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-full">Kegiatan & Aspek Penilaian</th>
-                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Siklus</th>
-                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Batas Waktu</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider w-1/2">Kegiatan & Aspek Penilaian</th>
+                                <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Batas Waktu & Siklus</th>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center">Status</th>
                             </tr>
                         </thead>
@@ -240,7 +239,6 @@
                     `;
                 }
 
-                // Perbaikan align-top pada td agar rapi saat baris meninggi
                 html += `
                     <tr class="${rowHighlight} transition-colors duration-150 group">
                         <td class="px-5 py-4 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">${index + 1}</td>
@@ -260,14 +258,11 @@
                             ` : ''}
                         </td>
                         
-                        <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600 align-top">
-                            <span class="text-xs font-medium text-slate-600">
+                        <td class="px-5 py-4 align-top">
+                            <div class="text-sm font-semibold text-slate-800 leading-snug">${item.batasWaktu}</div>
+                            <div class="text-xs text-slate-500 mt-2 pl-3 border-l-2 border-slate-200">
                                 ${item.siklus}
-                            </span>
-                        </td>
-                        
-                        <td class="px-5 py-4 whitespace-nowrap text-sm font-semibold text-slate-700 align-top">
-                            ${item.batasWaktu}
+                            </div>
                         </td>
                         
                         <td class="px-5 py-4 whitespace-nowrap text-center align-top">
