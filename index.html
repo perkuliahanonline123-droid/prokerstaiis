@@ -55,6 +55,7 @@
 
     <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-14 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
         
+        <!-- Panel Statistik -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up animate-delay-100">
             <div class="bg-white rounded-[1.25rem] p-5 border border-red-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
                 <div>
@@ -87,7 +88,8 @@
 
         <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 p-5 md:p-8 w-full animate-slide-up" style="animation-delay: 0.1s;">
             
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+            <!-- Area Header Tabel & Filter -->
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
                         <i class="fas fa-calendar-check text-lg"></i>
@@ -97,10 +99,24 @@
                         <p class="text-xs font-medium text-slate-500 mt-1">Pekerjaan diurutkan berdasarkan batas waktu terdekat</p>
                     </div>
                 </div>
-                <span id="syncStatus" class="flex items-center text-[10px] font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-100 w-fit">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
-                    Database Connected
-                </span>
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <!-- Dropdown Filter Divisi -->
+                    <div class="relative">
+                        <select id="filterDivisi" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg focus:ring-brand-500 focus:border-brand-500 block w-full sm:w-48 p-2.5 pr-8 cursor-pointer shadow-sm outline-none transition-all">
+                            <option value="all">Semua Divisi</option>
+                            <!-- Opsi akan di-generate otomatis -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    
+                    <span id="syncStatus" class="flex items-center text-[10px] font-bold bg-emerald-50 text-emerald-700 px-3 py-2 sm:py-1.5 rounded-lg sm:rounded-full border border-emerald-100 w-full sm:w-fit justify-center">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                        Database Connected
+                    </span>
+                </div>
             </div>
 
             <div id="loadingData" class="text-center py-16">
@@ -132,8 +148,18 @@
                             </tr>
                         </thead>
                         <tbody id="dataBody" class="divide-y divide-slate-100 bg-white">
-                            </tbody>
+                            <!-- Data Injected Here -->
+                        </tbody>
                     </table>
+                </div>
+                
+                <!-- Pesan jika data tidak ditemukan saat difilter -->
+                <div id="emptyState" class="hidden text-center py-12">
+                    <div class="w-12 h-12 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-folder-open text-xl"></i>
+                    </div>
+                    <p class="text-slate-600 font-bold text-sm">Tidak ada kegiatan</p>
+                    <p class="text-slate-400 text-xs mt-1">Belum ada jadwal rutin untuk divisi ini.</p>
                 </div>
             </div>
 
@@ -147,14 +173,30 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWOm3O52G3RWX1HPDXFEXVxYwfXQyf2EsNESVNkXn1jSnqk1GlgM5uSx0gXV_SaQwp/exec';
         const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+        
+        let allData = []; // Menyimpan semua data asli untuk keperluan filter
 
         document.addEventListener("DOMContentLoaded", loadData);
+
+        // Event listener untuk Filter Divisi
+        document.getElementById('filterDivisi').addEventListener('change', function(e) {
+            const selectedDivisi = e.target.value;
+            if (selectedDivisi === 'all') {
+                processAndRender(allData);
+            } else {
+                const filteredData = allData.filter(item => item.divisi === selectedDivisi);
+                processAndRender(filteredData);
+            }
+        });
 
         async function loadData() {
             const cachedData = localStorage.getItem('pekerjaan_rutin_cache');
             
             if (cachedData) {
-                processAndRender(JSON.parse(cachedData));
+                allData = JSON.parse(cachedData);
+                populateDivisiFilter(allData);
+                processAndRender(allData);
+                
                 const loadingEl = document.getElementById('loadingData');
                 loadingEl.classList.remove('py-16');
                 loadingEl.innerHTML = `
@@ -174,8 +216,20 @@
                     return;
                 }
 
+                allData = data; // Simpan ke global scope
                 localStorage.setItem('pekerjaan_rutin_cache', JSON.stringify(data));
-                processAndRender(data);
+                
+                populateDivisiFilter(allData);
+                
+                // Pertahankan filter jika sedang aktif saat auto-refresh selesai
+                const currentFilter = document.getElementById('filterDivisi').value;
+                if (currentFilter === 'all') {
+                    processAndRender(allData);
+                } else {
+                    const filteredData = allData.filter(item => item.divisi === currentFilter);
+                    processAndRender(filteredData);
+                }
+
             } catch (error) {
                 console.error("Fetch error:", error);
                 if (!cachedData) {
@@ -192,6 +246,31 @@
             document.getElementById('pesanError').innerText = message;
         }
 
+        // Fungsi untuk mengisi opsi dropdown secara dinamis
+        function populateDivisiFilter(data) {
+            const filterSelect = document.getElementById('filterDivisi');
+            const currentSelection = filterSelect.value;
+            
+            // Ambil nama divisi unik, hapus yg kosong, lalu urutkan abjad
+            const uniqueDivisions = [...new Set(data.map(item => item.divisi))]
+                                    .filter(Boolean)
+                                    .sort();
+            
+            // Reset opsi menjadi "Semua Divisi" saja
+            filterSelect.innerHTML = '<option value="all">Semua Divisi</option>';
+            
+            uniqueDivisions.forEach(divisi => {
+                const option = document.createElement('option');
+                option.value = divisi;
+                option.textContent = divisi;
+                // Pertahankan pilihan user jika ada refresh background
+                if (divisi === currentSelection) {
+                    option.selected = true;
+                }
+                filterSelect.appendChild(option);
+            });
+        }
+
         function getMonthWeight(text) {
             if (!text || text === 'Tidak ditentukan') return 999;
             const lower = text.toLowerCase();
@@ -202,15 +281,38 @@
         }
 
         function processAndRender(data) {
-            data.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
+            const tbody = document.getElementById('dataBody');
+            const table = document.querySelector('table');
+            const emptyState = document.getElementById('emptyState');
+            
+            document.getElementById('loadingData').classList.add('hidden');
+            document.getElementById('tableContainer').classList.remove('hidden');
+
+            // Handle jika data kosong setelah difilter
+            if (!data || data.length === 0) {
+                table.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                
+                // Reset statistik
+                document.getElementById('stat-critical').innerText = 0;
+                document.getElementById('stat-warning').innerText = 0;
+                document.getElementById('stat-total').innerText = 0;
+                return;
+            }
+
+            // Tampilkan kembali tabel jika ada data
+            table.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            // Copy data agar tidak merusak array asli (allData) saat di sort
+            const dataToRender = [...data];
+            dataToRender.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
 
             let criticalCount = 0;
             let warningCount = 0;
-            
-            const tbody = document.getElementById('dataBody');
             let html = '';
 
-            data.forEach((item, index) => {
+            dataToRender.forEach((item, index) => {
                 const timeText = item.batasWaktu.toLowerCase();
                 let alarmBadge = '';
                 let rowHighlight = 'hover:bg-slate-50';
@@ -274,12 +376,10 @@
                 `;
             });
 
+            // Update Panel Statistik
             document.getElementById('stat-critical').innerText = criticalCount;
             document.getElementById('stat-warning').innerText = warningCount;
-            document.getElementById('stat-total').innerText = data.length;
-
-            document.getElementById('loadingData').classList.add('hidden');
-            document.getElementById('tableContainer').classList.remove('hidden');
+            document.getElementById('stat-total').innerText = dataToRender.length;
             
             tbody.innerHTML = html;
         }
