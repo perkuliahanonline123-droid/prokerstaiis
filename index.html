@@ -34,7 +34,6 @@
         .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         
-        /* Custom scrollbar untuk list */
         .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -56,7 +55,8 @@
     <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-14 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up animate-delay-100">
-            <div class="bg-white rounded-[1.25rem] p-5 border border-red-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
+            
+            <div id="card-kritis" onclick="toggleStatusFilter('kritis')" class="cursor-pointer bg-white rounded-[1.25rem] p-5 border border-red-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-lg duration-300 ring-2 ring-transparent">
                 <div>
                     <p class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Alarm Kritis (Bulan Ini)</p>
                     <h3 id="stat-critical" class="text-3xl font-black text-red-700 mt-1">0</h3>
@@ -65,7 +65,8 @@
                     <i class="fas fa-exclamation-circle animate-pulse"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-[1.25rem] p-5 border border-amber-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
+
+            <div id="card-warning" onclick="toggleStatusFilter('warning')" class="cursor-pointer bg-white rounded-[1.25rem] p-5 border border-amber-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-lg duration-300 ring-2 ring-transparent">
                 <div>
                     <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Peringatan (Bulan Depan)</p>
                     <h3 id="stat-warning" class="text-3xl font-black text-amber-700 mt-1">0</h3>
@@ -74,15 +75,17 @@
                     <i class="fas fa-clock"></i>
                 </div>
             </div>
-            <div class="bg-white rounded-[1.25rem] p-5 border border-slate-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 duration-300">
+
+            <div id="card-total" onclick="toggleStatusFilter('all')" class="cursor-pointer bg-slate-50 ring-2 ring-slate-400 rounded-[1.25rem] p-5 border border-slate-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-lg duration-300">
                 <div>
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Terjadwal</p>
+                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Terjadwal</p>
                     <h3 id="stat-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-slate-50 text-slate-500 rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0">
+                <div class="w-12 h-12 bg-white text-slate-500 rounded-xl flex items-center justify-center text-xl shadow-sm shrink-0 border border-slate-100">
                     <i class="fas fa-list-check"></i>
                 </div>
             </div>
+
         </div>
 
         <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 p-5 md:p-8 w-full animate-slide-up" style="animation-delay: 0.1s;">
@@ -99,9 +102,9 @@
                 </div>
                 
                 <div class="relative w-full sm:w-auto">
-                    <select id="filterDivisi" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg focus:ring-brand-500 focus:border-brand-500 block w-full sm:w-56 p-2.5 pr-8 cursor-pointer shadow-sm outline-none transition-all">
+                    <select id="filterDivisi" onchange="applyFilters()" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg focus:ring-brand-500 focus:border-brand-500 block w-full sm:w-56 p-2.5 pr-8 cursor-pointer shadow-sm outline-none transition-all">
                         <option value="all">Semua Divisi</option>
-                        </select>
+                    </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                         <i class="fas fa-chevron-down text-xs"></i>
                     </div>
@@ -141,12 +144,12 @@
                     </table>
                 </div>
                 
-                <div id="emptyState" class="hidden text-center py-12">
-                    <div class="w-12 h-12 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div id="emptyState" class="hidden text-center py-12 bg-slate-50/50">
+                    <div class="w-12 h-12 bg-white text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-200 shadow-sm">
                         <i class="fas fa-folder-open text-xl"></i>
                     </div>
-                    <p class="text-slate-600 font-bold text-sm">Tidak ada kegiatan</p>
-                    <p class="text-slate-400 text-xs mt-1">Belum ada jadwal rutin untuk divisi ini.</p>
+                    <p class="text-slate-600 font-bold text-sm">Tidak ada pekerjaan</p>
+                    <p class="text-slate-400 text-xs mt-1">Sesuai dengan kriteria pencarian saat ini.</p>
                 </div>
             </div>
 
@@ -162,18 +165,9 @@
         const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
         
         let allData = [];
+        let currentStatusFilter = 'all'; // Status: 'all', 'kritis', 'warning'
 
         document.addEventListener("DOMContentLoaded", loadData);
-
-        document.getElementById('filterDivisi').addEventListener('change', function(e) {
-            const selectedDivisi = e.target.value;
-            if (selectedDivisi === 'all') {
-                processAndRender(allData);
-            } else {
-                const filteredData = allData.filter(item => item.divisi === selectedDivisi);
-                processAndRender(filteredData);
-            }
-        });
 
         async function loadData() {
             const cachedData = localStorage.getItem('pekerjaan_rutin_cache');
@@ -181,7 +175,7 @@
             if (cachedData) {
                 allData = JSON.parse(cachedData);
                 populateDivisiFilter(allData);
-                processAndRender(allData);
+                applyFilters();
                 
                 const loadingEl = document.getElementById('loadingData');
                 loadingEl.classList.remove('py-16');
@@ -206,14 +200,7 @@
                 localStorage.setItem('pekerjaan_rutin_cache', JSON.stringify(data));
                 
                 populateDivisiFilter(allData);
-                
-                const currentFilter = document.getElementById('filterDivisi').value;
-                if (currentFilter === 'all') {
-                    processAndRender(allData);
-                } else {
-                    const filteredData = allData.filter(item => item.divisi === currentFilter);
-                    processAndRender(filteredData);
-                }
+                applyFilters();
 
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -235,21 +222,106 @@
             const filterSelect = document.getElementById('filterDivisi');
             const currentSelection = filterSelect.value;
             
-            const uniqueDivisions = [...new Set(data.map(item => item.divisi))]
-                                    .filter(Boolean)
-                                    .sort();
+            const uniqueDivisions = [...new Set(data.map(item => item.divisi))].filter(Boolean).sort();
             
             filterSelect.innerHTML = '<option value="all">Semua Divisi</option>';
-            
             uniqueDivisions.forEach(divisi => {
                 const option = document.createElement('option');
                 option.value = divisi;
                 option.textContent = divisi;
-                if (divisi === currentSelection) {
-                    option.selected = true;
-                }
+                if (divisi === currentSelection) option.selected = true;
                 filterSelect.appendChild(option);
             });
+        }
+
+        // Fungsi pembantu mengecek status berdasar teks
+        function getItemStatus(batasWaktu) {
+            const timeText = (batasWaktu || '').toLowerCase();
+            if (timeText.includes('juli')) return 'kritis';
+            if (timeText.includes('agustus')) return 'warning';
+            return 'terjadwal';
+        }
+
+        // Ketika user menekan kartu statistik di atas
+        function toggleStatusFilter(status) {
+            // Jika kartu yg sama diklik lagi, jangan direset, tetap aktifkan filternya (bisa diubah sesuai selera)
+            currentStatusFilter = status;
+            
+            // Ubah tampilan aktif/tidak aktif pada Kartu
+            updateCardStyles();
+            
+            // Terapkan filter ke tabel
+            applyFilters();
+            
+            // Auto scroll perlahan ke arah tabel biar user notice
+            setTimeout(() => {
+                document.getElementById('tableContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function updateCardStyles() {
+            const cKritis = document.getElementById('card-kritis');
+            const cWarning = document.getElementById('card-warning');
+            const cTotal = document.getElementById('card-total');
+            
+            // Reset state
+            cKritis.classList.remove('ring-red-400', 'bg-red-50/50');
+            cKritis.classList.add('ring-transparent', 'bg-white');
+            
+            cWarning.classList.remove('ring-amber-400', 'bg-amber-50/50');
+            cWarning.classList.add('ring-transparent', 'bg-white');
+            
+            cTotal.classList.remove('ring-slate-400', 'bg-slate-50');
+            cTotal.classList.add('ring-transparent', 'bg-white');
+
+            // Set active state
+            if (currentStatusFilter === 'kritis') {
+                cKritis.classList.add('ring-red-400', 'bg-red-50/50');
+                cKritis.classList.remove('ring-transparent', 'bg-white');
+            } else if (currentStatusFilter === 'warning') {
+                cWarning.classList.add('ring-amber-400', 'bg-amber-50/50');
+                cWarning.classList.remove('ring-transparent', 'bg-white');
+            } else {
+                cTotal.classList.add('ring-slate-400', 'bg-slate-50');
+                cTotal.classList.remove('ring-transparent', 'bg-white');
+            }
+        }
+
+        // Fungsi master untuk memproses data dari semua filter (Divisi & Status)
+        function applyFilters() {
+            const selectedDivisi = document.getElementById('filterDivisi').value;
+            
+            // 1. Data dasar (filter berdasar Divisi saja)
+            let dataForDivisi = allData;
+            if (selectedDivisi !== 'all') {
+                dataForDivisi = allData.filter(item => item.divisi === selectedDivisi);
+            }
+            
+            // 2. Update angka di kartu statistik selalu berdasar Divisi yang sedang dipilih!
+            updateStatsCards(dataForDivisi);
+            
+            // 3. Data lanjutan (filter tambahan berdasar Status Kartu)
+            let dataForTable = dataForDivisi;
+            if (currentStatusFilter === 'kritis') {
+                dataForTable = dataForDivisi.filter(item => getItemStatus(item.batasWaktu) === 'kritis');
+            } else if (currentStatusFilter === 'warning') {
+                dataForTable = dataForDivisi.filter(item => getItemStatus(item.batasWaktu) === 'warning');
+            }
+            
+            // 4. Render tabelnya
+            renderTable(dataForTable);
+        }
+
+        function updateStatsCards(data) {
+            let kCount = 0, wCount = 0;
+            data.forEach(item => {
+                const status = getItemStatus(item.batasWaktu);
+                if (status === 'kritis') kCount++;
+                if (status === 'warning') wCount++;
+            });
+            document.getElementById('stat-critical').innerText = kCount;
+            document.getElementById('stat-warning').innerText = wCount;
+            document.getElementById('stat-total').innerText = data.length;
         }
 
         function getMonthWeight(text) {
@@ -261,11 +333,9 @@
             return 500; 
         }
 
-        // Fungsi interaktif untuk Accordion Aspek
         window.toggleAspek = function(index) {
             const content = document.getElementById(`aspek-content-${index}`);
             const icon = document.getElementById(`aspek-icon-${index}`);
-            
             if (content.classList.contains('hidden')) {
                 content.classList.remove('hidden');
                 icon.classList.add('rotate-180');
@@ -275,7 +345,7 @@
             }
         }
 
-        function processAndRender(data) {
+        function renderTable(dataToRender) {
             const tbody = document.getElementById('dataBody');
             const table = document.querySelector('table');
             const emptyState = document.getElementById('emptyState');
@@ -283,105 +353,60 @@
             document.getElementById('loadingData').classList.add('hidden');
             document.getElementById('tableContainer').classList.remove('hidden');
 
-            if (!data || data.length === 0) {
+            if (!dataToRender || dataToRender.length === 0) {
                 table.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                
-                document.getElementById('stat-critical').innerText = 0;
-                document.getElementById('stat-warning').innerText = 0;
-                document.getElementById('stat-total').innerText = 0;
                 return;
             }
 
             table.classList.remove('hidden');
             emptyState.classList.add('hidden');
 
-            const dataToRender = [...data];
             dataToRender.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
 
-            let criticalCount = 0;
-            let warningCount = 0;
             let html = '';
-
             dataToRender.forEach((item, index) => {
-                const timeText = item.batasWaktu.toLowerCase();
+                const statusItem = getItemStatus(item.batasWaktu);
                 let alarmBadge = '';
                 let rowHighlight = 'hover:bg-slate-50';
 
-                if (timeText.includes('juli')) {
-                    criticalCount++;
+                if (statusItem === 'kritis') {
                     rowHighlight = 'bg-red-50/20 hover:bg-red-50/50';
-                    alarmBadge = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200">
-                            <span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span> Bulan Ini
-                        </span>
-                    `;
-                } else if (timeText.includes('agustus')) {
-                    warningCount++;
+                    alarmBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200"><span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span> Bulan Ini</span>`;
+                } else if (statusItem === 'warning') {
                     rowHighlight = 'hover:bg-amber-50/30';
-                    alarmBadge = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> Bulan Depan
-                        </span>
-                    `;
+                    alarmBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> Bulan Depan</span>`;
                 } else {
-                    alarmBadge = `
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                            Terjadwal
-                        </span>
-                    `;
+                    alarmBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">Terjadwal</span>`;
                 }
 
-                // Cek apakah ada teks aspek untuk mengaktifkan fitur accordion
                 const hasAspek = item.aspek && item.aspek.trim() !== "";
 
                 html += `
                     <tr class="${rowHighlight} transition-colors duration-150 group">
                         <td class="px-5 py-5 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">${index + 1}</td>
-                        
                         <td class="px-5 py-5 whitespace-nowrap align-top">
                             <span class="text-sm font-bold text-brand-800 bg-brand-50 border border-brand-200 px-3 py-1.5 rounded-lg inline-block">
                                 ${item.divisi}
                             </span>
                         </td>
-                        
                         <td class="px-5 py-5 align-top">
-                            <div class="flex items-start justify-between ${hasAspek ? 'cursor-pointer hover:text-brand-700 transition-colors' : ''}" 
-                                 ${hasAspek ? `onclick="toggleAspek(${index})"` : ''}>
+                            <div class="flex items-start justify-between ${hasAspek ? 'cursor-pointer hover:text-brand-700 transition-colors' : ''}" ${hasAspek ? `onclick="toggleAspek(${index})"` : ''}>
                                 <div class="text-sm font-bold text-slate-800 leading-snug pr-4">${item.kegiatan}</div>
-                                ${hasAspek ? `
-                                    <div class="mt-0.5 shrink-0 bg-slate-100 p-1.5 rounded-md text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all">
-                                        <i id="aspek-icon-${index}" class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
-                                    </div>
-                                ` : ''}
+                                ${hasAspek ? `<div class="mt-0.5 shrink-0 bg-slate-100 p-1.5 rounded-md text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all"><i id="aspek-icon-${index}" class="fas fa-chevron-down text-xs transition-transform duration-300"></i></div>` : ''}
                             </div>
-                            
-                            ${hasAspek ? `
-                                <div id="aspek-content-${index}" class="hidden text-sm text-slate-600 mt-3 pl-3 border-l-2 border-brand-300 whitespace-pre-line leading-relaxed">
-                                    ${item.aspek}
-                                </div>
-                            ` : ''}
+                            ${hasAspek ? `<div id="aspek-content-${index}" class="hidden text-sm text-slate-600 mt-3 pl-3 border-l-2 border-brand-300 whitespace-pre-line leading-relaxed">${item.aspek}</div>` : ''}
                         </td>
-                        
                         <td class="px-5 py-5 align-top">
                             <div class="text-sm font-bold text-slate-800 leading-snug">${item.batasWaktu}</div>
-                            <div class="text-xs font-medium text-slate-500 mt-1">
-                                ${item.siklus}
-                            </div>
+                            <div class="text-xs font-medium text-slate-500 mt-1">${item.siklus}</div>
                         </td>
-                        
                         <td class="px-5 py-5 whitespace-nowrap text-center align-top">
-                            <div class="flex justify-center">
-                                ${alarmBadge}
-                            </div>
+                            <div class="flex justify-center">${alarmBadge}</div>
                         </td>
                     </tr>
                 `;
             });
-
-            document.getElementById('stat-critical').innerText = criticalCount;
-            document.getElementById('stat-warning').innerText = warningCount;
-            document.getElementById('stat-total').innerText = dataToRender.length;
             
             tbody.innerHTML = html;
         }
