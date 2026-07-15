@@ -165,7 +165,7 @@
         const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
         
         let allData = [];
-        let currentStatusFilter = 'all'; // Status: 'all', 'kritis', 'warning'
+        let currentStatusFilter = 'all'; 
 
         document.addEventListener("DOMContentLoaded", loadData);
 
@@ -234,26 +234,40 @@
             });
         }
 
-        // Fungsi pembantu mengecek status berdasar teks
+        // ==========================================
+        // PERBAIKAN LOGIKA SORTING & STATUS
+        // ==========================================
+        
         function getItemStatus(batasWaktu) {
             const timeText = (batasWaktu || '').toLowerCase();
+            // Penentuan status secara prioritas (Context: Juli)
             if (timeText.includes('juli')) return 'kritis';
             if (timeText.includes('agustus')) return 'warning';
             return 'terjadwal';
         }
 
-        // Ketika user menekan kartu statistik di atas
+        function getSortWeight(batasWaktu) {
+            // 1. Prioritaskan urutan berdasar Status Alarm
+            const status = getItemStatus(batasWaktu);
+            if (status === 'kritis') return 1;    // Kritis selalu paling atas
+            if (status === 'warning') return 2;   // Warning di urutan kedua
+            
+            // 2. Jika statusnya Terjadwal (Bulan lain), baru urutkan berdasar nama bulan
+            const timeText = (batasWaktu || '').toLowerCase();
+            for (let i = 0; i < monthOrder.length; i++) {
+                if (timeText.includes(monthOrder[i])) {
+                    // Berikan bobot di atas 10 agar selalu muncul setelah Kritis & Warning
+                    return i + 10; 
+                }
+            }
+            return 999; // Jika tidak ada bulan yang terdeteksi
+        }
+
         function toggleStatusFilter(status) {
-            // Jika kartu yg sama diklik lagi, jangan direset, tetap aktifkan filternya (bisa diubah sesuai selera)
             currentStatusFilter = status;
-            
-            // Ubah tampilan aktif/tidak aktif pada Kartu
             updateCardStyles();
-            
-            // Terapkan filter ke tabel
             applyFilters();
             
-            // Auto scroll perlahan ke arah tabel biar user notice
             setTimeout(() => {
                 document.getElementById('tableContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
@@ -264,7 +278,6 @@
             const cWarning = document.getElementById('card-warning');
             const cTotal = document.getElementById('card-total');
             
-            // Reset state
             cKritis.classList.remove('ring-red-400', 'bg-red-50/50');
             cKritis.classList.add('ring-transparent', 'bg-white');
             
@@ -274,7 +287,6 @@
             cTotal.classList.remove('ring-slate-400', 'bg-slate-50');
             cTotal.classList.add('ring-transparent', 'bg-white');
 
-            // Set active state
             if (currentStatusFilter === 'kritis') {
                 cKritis.classList.add('ring-red-400', 'bg-red-50/50');
                 cKritis.classList.remove('ring-transparent', 'bg-white');
@@ -287,20 +299,16 @@
             }
         }
 
-        // Fungsi master untuk memproses data dari semua filter (Divisi & Status)
         function applyFilters() {
             const selectedDivisi = document.getElementById('filterDivisi').value;
             
-            // 1. Data dasar (filter berdasar Divisi saja)
             let dataForDivisi = allData;
             if (selectedDivisi !== 'all') {
                 dataForDivisi = allData.filter(item => item.divisi === selectedDivisi);
             }
             
-            // 2. Update angka di kartu statistik selalu berdasar Divisi yang sedang dipilih!
             updateStatsCards(dataForDivisi);
             
-            // 3. Data lanjutan (filter tambahan berdasar Status Kartu)
             let dataForTable = dataForDivisi;
             if (currentStatusFilter === 'kritis') {
                 dataForTable = dataForDivisi.filter(item => getItemStatus(item.batasWaktu) === 'kritis');
@@ -308,7 +316,6 @@
                 dataForTable = dataForDivisi.filter(item => getItemStatus(item.batasWaktu) === 'warning');
             }
             
-            // 4. Render tabelnya
             renderTable(dataForTable);
         }
 
@@ -322,15 +329,6 @@
             document.getElementById('stat-critical').innerText = kCount;
             document.getElementById('stat-warning').innerText = wCount;
             document.getElementById('stat-total').innerText = data.length;
-        }
-
-        function getMonthWeight(text) {
-            if (!text || text === 'Tidak ditentukan') return 999;
-            const lower = text.toLowerCase();
-            for (let i = 0; i < monthOrder.length; i++) {
-                if (lower.includes(monthOrder[i])) return i; 
-            }
-            return 500; 
         }
 
         window.toggleAspek = function(index) {
@@ -362,7 +360,8 @@
             table.classList.remove('hidden');
             emptyState.classList.add('hidden');
 
-            dataToRender.sort((a, b) => getMonthWeight(a.batasWaktu) - getMonthWeight(b.batasWaktu));
+            // Pengurutan sekarang menggunakan getSortWeight yang baru
+            dataToRender.sort((a, b) => getSortWeight(a.batasWaktu) - getSortWeight(b.batasWaktu));
 
             let html = '';
             dataToRender.forEach((item, index) => {
