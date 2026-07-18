@@ -55,7 +55,6 @@
     <main class="w-full max-w-7xl mx-auto px-4 md:px-8 -mt-14 md:-mt-16 relative z-20 space-y-6 pb-12 flex-1">
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up animate-delay-100">
-            
             <div id="card-kritis" onclick="toggleStatusFilter('kritis')" class="cursor-pointer bg-white rounded-[1.25rem] p-5 border border-red-100 shadow-md flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-lg duration-300 ring-2 ring-transparent">
                 <div>
                     <p class="text-[11px] font-bold text-red-500 uppercase tracking-wider">Alarm Kritis (Bulan Ini)</p>
@@ -85,7 +84,6 @@
                     <i class="fas fa-list-check"></i>
                 </div>
             </div>
-
         </div>
 
         <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 p-5 md:p-8 w-full animate-slide-up" style="animation-delay: 0.1s;">
@@ -127,10 +125,12 @@
                 <p class="text-slate-500 text-xs" id="pesanError"></p>
             </div>
 
-            <div id="tableContainer" class="hidden overflow-hidden rounded-xl border border-slate-200">
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="min-w-full divide-y divide-slate-200 text-left">
-                        <thead class="bg-slate-50">
+            <div id="tableContainer" class="hidden rounded-xl border border-slate-200">
+                <!-- Overflow-x-auto hanya aktif di layar sedang/besar, di HP dihilangkan untuk blok -->
+                <div class="md:overflow-x-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-slate-200 text-left block md:table">
+                        <!-- Header disembunyikan di tampilan HP -->
+                        <thead class="hidden md:table-header-group bg-slate-50">
                             <tr>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">No</th>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-32">Divisi</th>
@@ -139,8 +139,8 @@
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="dataBody" class="divide-y divide-slate-100 bg-white">
-                            </tbody>
+                        <tbody id="dataBody" class="block md:table-row-group divide-y divide-slate-100 bg-white">
+                        </tbody>
                     </table>
                 </div>
                 
@@ -233,34 +233,26 @@
                 filterSelect.appendChild(option);
             });
         }
-
-        // ==========================================
-        // PERBAIKAN LOGIKA SORTING & STATUS
-        // ==========================================
         
         function getItemStatus(batasWaktu) {
             const timeText = (batasWaktu || '').toLowerCase();
-            // Penentuan status secara prioritas (Context: Juli)
             if (timeText.includes('juli')) return 'kritis';
             if (timeText.includes('agustus')) return 'warning';
             return 'terjadwal';
         }
 
         function getSortWeight(batasWaktu) {
-            // 1. Prioritaskan urutan berdasar Status Alarm
             const status = getItemStatus(batasWaktu);
-            if (status === 'kritis') return 1;    // Kritis selalu paling atas
-            if (status === 'warning') return 2;   // Warning di urutan kedua
+            if (status === 'kritis') return 1;
+            if (status === 'warning') return 2;
             
-            // 2. Jika statusnya Terjadwal (Bulan lain), baru urutkan berdasar nama bulan
             const timeText = (batasWaktu || '').toLowerCase();
             for (let i = 0; i < monthOrder.length; i++) {
                 if (timeText.includes(monthOrder[i])) {
-                    // Berikan bobot di atas 10 agar selalu muncul setelah Kritis & Warning
                     return i + 10; 
                 }
             }
-            return 999; // Jika tidak ada bulan yang terdeteksi
+            return 999;
         }
 
         function toggleStatusFilter(status) {
@@ -331,15 +323,17 @@
             document.getElementById('stat-total').innerText = data.length;
         }
 
-        window.toggleAspek = function(index) {
-            const content = document.getElementById(`aspek-content-${index}`);
-            const icon = document.getElementById(`aspek-icon-${index}`);
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                icon.classList.add('rotate-180');
-            } else {
-                content.classList.add('hidden');
-                icon.classList.remove('rotate-180');
+        window.toggleAspek = function(id) {
+            const content = document.getElementById(`aspek-content-${id}`);
+            const icon = document.getElementById(`aspek-icon-${id}`);
+            if (content && icon) {
+                if (content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    icon.classList.add('rotate-180');
+                } else {
+                    content.classList.add('hidden');
+                    icon.classList.remove('rotate-180');
+                }
             }
         }
 
@@ -360,7 +354,6 @@
             table.classList.remove('hidden');
             emptyState.classList.add('hidden');
 
-            // Pengurutan sekarang menggunakan getSortWeight yang baru
             dataToRender.sort((a, b) => getSortWeight(a.batasWaktu) - getSortWeight(b.batasWaktu));
 
             let html = '';
@@ -371,37 +364,78 @@
 
                 if (statusItem === 'kritis') {
                     rowHighlight = 'bg-red-50/20 hover:bg-red-50/50';
-                    alarmBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200"><span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span> Bulan Ini</span>`;
+                    alarmBadge = `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] md:text-xs font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200"><span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span> Bulan Ini</span>`;
                 } else if (statusItem === 'warning') {
                     rowHighlight = 'hover:bg-amber-50/30';
-                    alarmBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> Bulan Depan</span>`;
+                    alarmBadge = `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> Bulan Depan</span>`;
                 } else {
-                    alarmBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">Terjadwal</span>`;
+                    alarmBadge = `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] md:text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">Terjadwal</span>`;
                 }
 
                 const hasAspek = item.aspek && item.aspek.trim() !== "";
 
                 html += `
-                    <tr class="${rowHighlight} transition-colors duration-150 group">
-                        <td class="px-5 py-5 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">${index + 1}</td>
-                        <td class="px-5 py-5 whitespace-nowrap align-top">
-                            <!-- PERBAIKAN STYLING DI BAWAH INI -->
-                            <span class="text-base md:text-lg font-extrabold text-brand-900 bg-gradient-to-br from-brand-50 to-brand-100/50 border border-brand-200/80 px-4 py-2 md:px-5 md:py-2.5 rounded-xl shadow-sm inline-block tracking-wide">
+                    <tr class="${rowHighlight} transition-colors duration-150 group block md:table-row border-b border-slate-200 md:border-b-0 p-5 md:p-0">
+                        <!-- Tampilan No (Hanya Desktop) -->
+                        <td class="hidden md:table-cell px-5 py-5 whitespace-nowrap text-sm font-medium text-slate-400 align-top group-hover:text-slate-600">
+                            ${index + 1}
+                        </td>
+                        
+                        <!-- Gabungan Mobile 2 Kolom & Divisi Desktop -->
+                        <td class="block md:table-cell px-0 md:px-5 py-0 md:py-5 align-top w-full md:w-auto">
+                            
+                            <!-- Divisi Khusus Desktop -->
+                            <div class="hidden md:inline-block text-lg font-extrabold text-brand-900 bg-gradient-to-br from-brand-50 to-brand-100/50 border border-brand-200/80 px-5 py-2.5 rounded-xl shadow-sm tracking-wide">
                                 ${item.divisi}
-                            </span>
-                        </td>
-                        <td class="px-5 py-5 align-top">
-                            <div class="flex items-start justify-between ${hasAspek ? 'cursor-pointer hover:text-brand-700 transition-colors' : ''}" ${hasAspek ? `onclick="toggleAspek(${index})"` : ''}>
-                                <div class="text-sm font-bold text-slate-800 leading-snug pr-4">${item.kegiatan}</div>
-                                ${hasAspek ? `<div class="mt-0.5 shrink-0 bg-slate-100 p-1.5 rounded-md text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all"><i id="aspek-icon-${index}" class="fas fa-chevron-down text-xs transition-transform duration-300"></i></div>` : ''}
                             </div>
-                            ${hasAspek ? `<div id="aspek-content-${index}" class="hidden text-sm text-slate-600 mt-3 pl-3 border-l-2 border-brand-300 whitespace-pre-line leading-relaxed">${item.aspek}</div>` : ''}
+
+                            <!-- Struktur 2 Kolom Khusus Mobile -->
+                            <div class="md:hidden grid grid-cols-[1fr_auto] gap-4 w-full items-start">
+                                <!-- Kolom Kiri: Nomor, Divisi, dan Kegiatan -->
+                                <div class="flex flex-col gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-400">#${index + 1}</span>
+                                        <span class="text-sm font-extrabold text-brand-900 bg-gradient-to-br from-brand-50 to-brand-100/50 border border-brand-200/80 px-3 py-1.5 rounded-lg shadow-sm tracking-wide">
+                                            ${item.divisi}
+                                        </span>
+                                    </div>
+                                    <div class="w-full">
+                                        <div class="flex items-start justify-between ${hasAspek ? 'cursor-pointer active:opacity-70' : ''}" ${hasAspek ? `onclick="toggleAspek('m-${index}')"` : ''}>
+                                            <div class="text-[13px] font-bold text-slate-800 leading-snug pr-2">${item.kegiatan}</div>
+                                            ${hasAspek ? `<div class="shrink-0 text-slate-400 bg-slate-50 p-1 rounded border border-slate-100"><i id="aspek-icon-m-${index}" class="fas fa-chevron-down text-[10px] transition-transform duration-300"></i></div>` : ''}
+                                        </div>
+                                        ${hasAspek ? `<div id="aspek-content-m-${index}" class="hidden text-xs text-slate-600 mt-2 pl-2 border-l-2 border-brand-300 whitespace-pre-line leading-relaxed">${item.aspek}</div>` : ''}
+                                    </div>
+                                </div>
+
+                                <!-- Kolom Kanan: Batas Waktu & Status -->
+                                <div class="flex flex-col items-end text-right gap-2.5 mt-0.5">
+                                    <div>
+                                        <div class="text-[13px] font-bold text-slate-800 leading-none mb-1">${item.batasWaktu}</div>
+                                        <div class="text-[10px] font-medium text-slate-500">${item.siklus}</div>
+                                    </div>
+                                    <div>${alarmBadge}</div>
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-5 py-5 align-top">
+                        
+                        <!-- Tampilan Kegiatan (Hanya Desktop) -->
+                        <td class="hidden md:table-cell px-5 py-5 align-top">
+                            <div class="flex items-start justify-between ${hasAspek ? 'cursor-pointer hover:text-brand-700 transition-colors' : ''}" ${hasAspek ? `onclick="toggleAspek('d-${index}')"` : ''}>
+                                <div class="text-sm font-bold text-slate-800 leading-snug pr-4">${item.kegiatan}</div>
+                                ${hasAspek ? `<div class="mt-0.5 shrink-0 bg-slate-100 p-1.5 rounded-md text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all"><i id="aspek-icon-d-${index}" class="fas fa-chevron-down text-xs transition-transform duration-300"></i></div>` : ''}
+                            </div>
+                            ${hasAspek ? `<div id="aspek-content-d-${index}" class="hidden text-sm text-slate-600 mt-3 pl-3 border-l-2 border-brand-300 whitespace-pre-line leading-relaxed">${item.aspek}</div>` : ''}
+                        </td>
+                        
+                        <!-- Tampilan Batas Waktu (Hanya Desktop) -->
+                        <td class="hidden md:table-cell px-5 py-5 align-top">
                             <div class="text-sm font-bold text-slate-800 leading-snug">${item.batasWaktu}</div>
                             <div class="text-xs font-medium text-slate-500 mt-1">${item.siklus}</div>
                         </td>
-                        <td class="px-5 py-5 whitespace-nowrap text-center align-top">
+                        
+                        <!-- Tampilan Status (Hanya Desktop) -->
+                        <td class="hidden md:table-cell px-5 py-5 whitespace-nowrap text-center align-top">
                             <div class="flex justify-center">${alarmBadge}</div>
                         </td>
                     </tr>
