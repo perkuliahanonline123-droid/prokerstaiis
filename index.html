@@ -126,10 +126,9 @@
             </div>
 
             <div id="tableContainer" class="hidden rounded-xl border border-slate-200">
-                <!-- Overflow-x-auto hanya aktif di layar sedang/besar, di HP dihilangkan untuk blok -->
+                <!-- Overflow-x-auto hanya aktif di layar sedang/besar -->
                 <div class="md:overflow-x-auto custom-scrollbar">
                     <table class="min-w-full divide-y divide-slate-200 text-left block md:table">
-                        <!-- Header disembunyikan di tampilan HP -->
                         <thead class="hidden md:table-header-group bg-slate-50">
                             <tr>
                                 <th scope="col" class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap w-12">No</th>
@@ -166,6 +165,9 @@
         
         let allData = [];
         let currentStatusFilter = 'all'; 
+        
+        // Objek untuk menyimpan state tugas selesai di LocalStorage
+        let completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
 
         document.addEventListener("DOMContentLoaded", loadData);
 
@@ -234,6 +236,10 @@
             });
         }
         
+        function getTaskId(item) {
+            return (item.divisi + '_' + item.kegiatan).replace(/[^a-zA-Z0-9]/g, '_');
+        }
+
         function getItemStatus(batasWaktu) {
             const timeText = (batasWaktu || '').toLowerCase();
             if (timeText.includes('juli')) return 'kritis';
@@ -241,12 +247,21 @@
             return 'terjadwal';
         }
 
-        function getSortWeight(batasWaktu) {
-            const status = getItemStatus(batasWaktu);
-            if (status === 'kritis') return 1;
-            if (status === 'warning') return 2;
+        function getStatusAndSelesai(item) {
+            const taskId = getTaskId(item);
+            const isSelesai = completedTasks[taskId] || false;
+            const timeStatus = getItemStatus(item.batasWaktu);
+            return { isSelesai, timeStatus, taskId };
+        }
+
+        function getSortWeight(item) {
+            const { isSelesai, timeStatus } = getStatusAndSelesai(item);
+            if (isSelesai) return 1000; // Pindahkan tugas yang selesai ke urutan terbawah
             
-            const timeText = (batasWaktu || '').toLowerCase();
+            if (timeStatus === 'kritis') return 1;
+            if (timeStatus === 'warning') return 2;
+            
+            const timeText = (item.batasWaktu || '').toLowerCase();
             for (let i = 0; i < monthOrder.length; i++) {
                 if (timeText.includes(monthOrder[i])) {
                     return i + 10; 
@@ -303,9 +318,15 @@
             
             let dataForTable = dataForDivisi;
             if (currentStatusFilter === 'kritis') {
-                dataForTable = dataForDivisi.filter(item => getItemStatus(item.batasWaktu) === 'kritis');
+                dataForTable = dataForDivisi.filter(item => {
+                    const { isSelesai, timeStatus } = getStatusAndSelesai(item);
+                    return !isSelesai && timeStatus === 'kritis';
+                });
             } else if (currentStatusFilter === 'warning') {
-                dataForTable = dataForDivisi.filter(item => getItemStatus(item.batasWaktu) === 'warning');
+                dataForTable = dataForDivisi.filter(item => {
+                    const { isSelesai, timeStatus } = getStatusAndSelesai(item);
+                    return !isSelesai && timeStatus === 'warning';
+                });
             }
             
             renderTable(dataForTable);
@@ -314,9 +335,12 @@
         function updateStatsCards(data) {
             let kCount = 0, wCount = 0;
             data.forEach(item => {
-                const status = getItemStatus(item.batasWaktu);
-                if (status === 'kritis') kCount++;
-                if (status === 'warning') wCount++;
+                const { isSelesai, timeStatus } = getStatusAndSelesai(item);
+                // Hanya dihitung sebagai alarm jika BELUM SELESAI
+                if (!isSelesai) {
+                    if (timeStatus === 'kritis') kCount++;
+                    if (timeStatus === 'warning') wCount++;
+                }
             });
             document.getElementById('stat-critical').innerText = kCount;
             document.getElementById('stat-warning').innerText = wCount;
@@ -337,6 +361,18 @@
             }
         }
 
+        window.markSelesai = function(taskId, event) {
+            event.stopPropagation();
+            let pass = prompt("Masukkan sandi untuk menyelesaikan pekerjaan:");
+            if (pass === "admin241") {
+                completedTasks[taskId] = true;
+                localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+                applyFilters(); // Render ulang agar UI dan Counter terupdate
+            } else if (pass !== null) {
+                alert("Sandi salah! Gagal memperbarui status.");
+            }
+        }
+
         function renderTable(dataToRender) {
             const tbody = document.getElementById('dataBody');
             const table = document.querySelector('table');
@@ -354,22 +390,32 @@
             table.classList.remove('hidden');
             emptyState.classList.add('hidden');
 
-            dataToRender.sort((a, b) => getSortWeight(a.batasWaktu) - getSortWeight(b.batasWaktu));
+            dataToRender.sort((a, b) => getSortWeight(a) - getSortWeight(b));
 
             let html = '';
             dataToRender.forEach((item, index) => {
-                const statusItem = getItemStatus(item.batasWaktu);
+                const { isSelesai, timeStatus, taskId } = getStatusAndSelesai(item);
+                
                 let alarmBadge = '';
+                let actionBtn = '';
                 let rowHighlight = 'hover:bg-slate-50';
 
-                if (statusItem === 'kritis') {
-                    rowHighlight = 'bg-red-50/20 hover:bg-red-50/50';
-                    alarmBadge = `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] md:text-xs font-bold bg-red-100 text-red-700 animate-pulse-slow border border-red-200"><span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span> Bulan Ini</span>`;
-                } else if (statusItem === 'warning') {
-                    rowHighlight = 'hover:bg-amber-50/30';
-                    alarmBadge = `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5"></span> Bulan Depan</span>`;
+                // Menyesuaikan tampilan berdasarkan Selesai/Belum
+                if (timeStatus === 'kritis') {
+                    rowHighlight = isSelesai ? 'bg-emerald-50/20' : 'bg-red-50/20 hover:bg-red-50/50';
+                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-bold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 animate-pulse-slow border-red-200'} border"><span class="w-1.5 h-1.5 ${isSelesai ? 'bg-emerald-500' : 'bg-red-600'} rounded-full mr-1.5"></span> Bulan Ini</span>`;
+                } else if (timeStatus === 'warning') {
+                    rowHighlight = isSelesai ? 'bg-emerald-50/20' : 'hover:bg-amber-50/30';
+                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-bold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'} border"><span class="w-1.5 h-1.5 ${isSelesai ? 'bg-emerald-500' : 'bg-amber-500'} rounded-full mr-1.5"></span> Bulan Depan</span>`;
                 } else {
-                    alarmBadge = `<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] md:text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">Terjadwal</span>`;
+                    rowHighlight = isSelesai ? 'bg-emerald-50/20' : 'hover:bg-slate-50';
+                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-semibold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border">Terjadwal</span>`;
+                }
+
+                if (isSelesai) {
+                    actionBtn = `<button class="w-full px-2 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded shadow-sm flex items-center justify-center gap-1 cursor-default"><i class="fas fa-check"></i> SELESAI</button>`;
+                } else {
+                    actionBtn = `<button onclick="markSelesai('${taskId}', event)" class="w-full px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded shadow-sm transition-colors cursor-pointer tracking-wider">BELUM</button>`;
                 }
 
                 const hasAspek = item.aspek && item.aspek.trim() !== "";
@@ -414,7 +460,10 @@
                                         <div class="text-[13px] font-bold text-slate-800 leading-none mb-1">${item.batasWaktu}</div>
                                         <div class="text-[10px] font-medium text-slate-500">${item.siklus}</div>
                                     </div>
-                                    <div>${alarmBadge}</div>
+                                    <div class="flex flex-col gap-1 w-[85px]">
+                                        ${alarmBadge}
+                                        ${actionBtn}
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -436,7 +485,10 @@
                         
                         <!-- Tampilan Status (Hanya Desktop) -->
                         <td class="hidden md:table-cell px-5 py-5 whitespace-nowrap text-center align-top">
-                            <div class="flex justify-center">${alarmBadge}</div>
+                            <div class="flex flex-col items-center justify-center gap-1.5 w-[90px] mx-auto">
+                                ${alarmBadge}
+                                ${actionBtn}
+                            </div>
                         </td>
                     </tr>
                 `;
