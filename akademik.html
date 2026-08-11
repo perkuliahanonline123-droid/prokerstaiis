@@ -331,18 +331,31 @@
 
         function getSortWeight(item) {
             const { isSelesai, timeStatus } = getStatusAndSelesai(item);
-            if (isSelesai) return 1000; // Pindahkan tugas yang selesai ke urutan terbawah
             
-            if (timeStatus === 'kritis') return 1;
-            if (timeStatus === 'warning') return 2;
+            // Prioritas Terbawah: Tugas yang sudah selesai
+            if (isSelesai) return 1000; 
             
+            const cycleText = (item.siklus || '').toLowerCase();
+
+            // Pengurutan untuk status Kritis (Hari Ini, Pekan Ini, Bulan Ini)
+            if (timeStatus === 'kritis') {
+                if (cycleText.includes('harian')) return 1;    // Prioritas 1: Hari Ini
+                if (cycleText.includes('mingguan')) return 2;  // Prioritas 2: Pekan Ini
+                return 3;                                      // Prioritas 3: Bulan Ini / Bulanan
+            }
+            
+            // Prioritas 4: Bulan Depan
+            if (timeStatus === 'warning') return 4; 
+            
+            // Prioritas 5 dst: Terjadwal (Diurutkan berdasarkan urutan bulan di kalender)
             const timeText = (item.batasWaktu || '').toLowerCase();
             for (let i = 0; i < monthOrder.length; i++) {
                 if (timeText.includes(monthOrder[i])) {
                     return i + 10; 
                 }
             }
-            return 999;
+            
+            return 999; // Jika tidak ada format bulan yang cocok
         }
 
         function toggleStatusFilter(status) {
