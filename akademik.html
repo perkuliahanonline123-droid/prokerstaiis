@@ -155,26 +155,88 @@
     </main>
 
     <footer class="w-full text-center py-6 text-slate-400 text-xs font-semibold tracking-wider mt-auto bg-transparent z-10">
-        &copy; 2026 Admin Administrasi Akademik
+        &copy; 2026 Admin Administrasi
     </footer>
 
     <script>
+        // Ganti parameter sheetName jika file ini digunakan untuk data lain
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWOm3O52G3RWX1HPDXFEXVxYwfXQyf2EsNESVNkXn1jSnqk1GlgM5uSx0gXV_SaQwp/exec?sheetName=Akademik';
         const monthOrder = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
         
         let allData = [];
         let currentStatusFilter = 'all'; 
         
-        // Objek untuk menyimpan state tugas selesai di LocalStorage
+        // Objek untuk menyimpan state tugas selesai di LocalStorage beserta tanggalnya
         let completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
 
         document.addEventListener("DOMContentLoaded", loadData);
+
+        // FUNGSI BARU: Mengecek dan mereset tugas selesai jika siklus waktunya sudah berganti
+        function checkTaskResets() {
+            let changed = false;
+            const now = new Date();
+            
+            for (let taskId in completedTasks) {
+                // Konversi format lama (true) ke timestamp agar tidak error
+                if (completedTasks[taskId] === true) {
+                    completedTasks[taskId] = now.toISOString();
+                    changed = true;
+                }
+                
+                const completionTime = new Date(completedTasks[taskId]);
+                const item = allData.find(i => getTaskId(i) === taskId);
+                
+                if (!item) continue;
+                
+                const cycleText = (item.siklus || '').toLowerCase();
+                let shouldReset = false;
+
+                if (cycleText.includes('harian')) {
+                    // Reset jika hari sudah berganti (tanggal berbeda)
+                    if (now.toDateString() !== completionTime.toDateString()) {
+                        shouldReset = true;
+                    }
+                } else if (cycleText.includes('mingguan') || cycleText.includes('minggu')) {
+                    // Reset jika minggu sudah berbeda
+                    const getWeekNumber = (d) => {
+                        const date = new Date(d.getTime());
+                        date.setHours(0, 0, 0, 0);
+                        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+                        const week1 = new Date(date.getFullYear(), 0, 4);
+                        return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+                    };
+                    if (getWeekNumber(now) !== getWeekNumber(completionTime) || now.getFullYear() !== completionTime.getFullYear()) {
+                        shouldReset = true;
+                    }
+                } else if (cycleText.includes('bulanan') || cycleText.includes('bulan')) {
+                    // Reset jika bulan sudah berganti
+                    if (now.getMonth() !== completionTime.getMonth() || now.getFullYear() !== completionTime.getFullYear()) {
+                        shouldReset = true;
+                    }
+                } else if (cycleText.includes('tahunan') || cycleText.includes('tahun')) {
+                    // Reset jika tahun sudah berganti
+                    if (now.getFullYear() !== completionTime.getFullYear()) {
+                        shouldReset = true;
+                    }
+                }
+                
+                if (shouldReset) {
+                    delete completedTasks[taskId];
+                    changed = true;
+                }
+            }
+            
+            if (changed) {
+                localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            }
+        }
 
         async function loadData() {
             const cachedData = localStorage.getItem('pekerjaan_rutin_cache');
             
             if (cachedData) {
                 allData = JSON.parse(cachedData);
+                checkTaskResets(); // Cek reset siklus
                 populateDivisiFilter(allData);
                 applyFilters();
                 
@@ -200,6 +262,7 @@
                 allData = data; 
                 localStorage.setItem('pekerjaan_rutin_cache', JSON.stringify(data));
                 
+                checkTaskResets(); // Cek reset siklus berdasarkan data terbaru
                 populateDivisiFilter(allData);
                 applyFilters();
 
@@ -239,17 +302,30 @@
             return (item.divisi + '_' + item.kegiatan).replace(/[^a-zA-Z0-9]/g, '_');
         }
 
-        function getItemStatus(batasWaktu) {
+        function getItemStatus(batasWaktu, siklus) {
             const timeText = (batasWaktu || '').toLowerCase();
-            if (timeText.includes('juli')) return 'kritis';
-            if (timeText.includes('agustus')) return 'warning';
+            const cycleText = (siklus || '').toLowerCase();
+
+            // Prioritas Pertama: Tugas dengan siklus Harian, Mingguan, Bulanan selalu dianggap 'Kritis' untuk dikerjakan
+            if (cycleText.includes('harian') || cycleText.includes('mingguan') || cycleText.includes('bulanan')) {
+                return 'kritis';
+            }
+
+            // Prioritas Kedua: Mencocokkan bulan secara dinamis berdasarkan waktu sistem saat ini
+            const currentMonthIndex = new Date().getMonth();
+            const currentMonthName = monthOrder[currentMonthIndex];
+            const nextMonthName = monthOrder[(currentMonthIndex + 1) % 12];
+
+            if (timeText.includes(currentMonthName)) return 'kritis';
+            if (timeText.includes(nextMonthName)) return 'warning';
+
             return 'terjadwal';
         }
 
         function getStatusAndSelesai(item) {
             const taskId = getTaskId(item);
-            const isSelesai = completedTasks[taskId] || false;
-            const timeStatus = getItemStatus(item.batasWaktu);
+            const isSelesai = !!completedTasks[taskId]; // Pastikan mengembalikan boolean
+            const timeStatus = getItemStatus(item.batasWaktu, item.siklus);
             return { isSelesai, timeStatus, taskId };
         }
 
@@ -359,7 +435,6 @@
             }
         }
 
-        // Fungsi baru untuk toggle status bolak-balik (Belum <-> Selesai)
         window.toggleStatusPekerjaan = function(taskId, isCurrentlySelesai, event) {
             event.stopPropagation();
             
@@ -368,15 +443,13 @@
             
             if (pass === "admin241") {
                 if (isCurrentlySelesai) {
-                    // Jika sebelumnya Selesai, hapus dari list selesai
                     delete completedTasks[taskId];
                 } else {
-                    // Jika sebelumnya Belum, tandai sebagai selesai
-                    completedTasks[taskId] = true;
+                    completedTasks[taskId] = new Date().toISOString(); // Simpan Timestamp untuk kebutuhan Auto-Reset
                 }
                 
                 localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-                applyFilters(); // Render ulang agar UI dan Counter terupdate
+                applyFilters(); 
             } else if (pass !== null) {
                 alert("Sandi salah! Gagal memperbarui status.");
             }
@@ -409,19 +482,28 @@
                 let actionBtn = '';
                 let rowHighlight = 'hover:bg-slate-50';
 
-                // Menyesuaikan tampilan berdasarkan Selesai/Belum
+                const cycleText = (item.siklus || '').toLowerCase();
+                let badgeText = 'Terjadwal';
+
+                // Menyesuaikan tampilan berdasarkan status dan siklus berulang
                 if (timeStatus === 'kritis') {
                     rowHighlight = isSelesai ? 'bg-emerald-50/20' : 'bg-red-50/20 hover:bg-red-50/50';
-                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-bold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 animate-pulse-slow border-red-200'} border"><span class="w-1.5 h-1.5 ${isSelesai ? 'bg-emerald-500' : 'bg-red-600'} rounded-full mr-1.5"></span> Bulan Ini</span>`;
+                    
+                    if (cycleText.includes('harian')) badgeText = 'Hari Ini';
+                    else if (cycleText.includes('mingguan')) badgeText = 'Pekan Ini';
+                    else if (cycleText.includes('bulanan')) badgeText = 'Bulan Ini';
+                    else badgeText = 'Bulan Ini';
+
+                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-bold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 animate-pulse-slow border-red-200'} border"><span class="w-1.5 h-1.5 ${isSelesai ? 'bg-emerald-500' : 'bg-red-600'} rounded-full mr-1.5"></span> ${badgeText}</span>`;
                 } else if (timeStatus === 'warning') {
                     rowHighlight = isSelesai ? 'bg-emerald-50/20' : 'hover:bg-amber-50/30';
-                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-bold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'} border"><span class="w-1.5 h-1.5 ${isSelesai ? 'bg-emerald-500' : 'bg-amber-500'} rounded-full mr-1.5"></span> Bulan Depan</span>`;
+                    badgeText = 'Bulan Depan';
+                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-bold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'} border"><span class="w-1.5 h-1.5 ${isSelesai ? 'bg-emerald-500' : 'bg-amber-500'} rounded-full mr-1.5"></span> ${badgeText}</span>`;
                 } else {
                     rowHighlight = isSelesai ? 'bg-emerald-50/20' : 'hover:bg-slate-50';
-                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-semibold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border">Terjadwal</span>`;
+                    alarmBadge = `<span class="inline-flex items-center justify-center w-full px-2 py-1.5 rounded-md text-[10px] md:text-xs font-semibold ${isSelesai ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border">${badgeText}</span>`;
                 }
 
-                // Perubahan di bagian actionBtn agar tombol SELESAI juga bisa diklik
                 if (isSelesai) {
                     actionBtn = `<button onclick="toggleStatusPekerjaan('${taskId}', true, event)" class="w-full px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold rounded shadow-sm flex items-center justify-center gap-1 cursor-pointer transition-colors"><i class="fas fa-check"></i> SELESAI</button>`;
                 } else {
